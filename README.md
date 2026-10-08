@@ -4,6 +4,8 @@ I wanted to see the [Astronomy Picture of the Day (APOD)](https://apod.com/en/) 
 
 It shows the daily image above your shortcuts. Click the image title to show or hide its credits and explanation. The arrows let you browse earlier days, and **Today** takes you back to the latest picture.
 
+Sunrise, sunset, moonrise, moonset, and moon phase appear in a small row above the image. Location and time zone are detected automatically. You can override coordinates in **Customize**.
+
 ## Install
 
 1. Download this repository using **Code → Download ZIP** and unzip it.
@@ -21,4 +23,4 @@ No build step or dependency installation is needed.
 - To hide Chrome's bottom banner, right-click it and choose **Hide footer on New Tab page**.
 - No API key or account is needed. Settings stay in your browser. See [Privacy](PRIVACY.md).
 
-The code is [MIT licensed](LICENSE). The gray New Tab icons are from [Chromium](extension/icons/LICENSE). APOD images and text retain their original credits and rights.
+The code is [MIT licensed](LICENSE). The gray New Tab icons are from [Chromium](extension/icons/LICENSE); astronomy calculations use bundled [SunCalc](extension/vendor/suncalc/LICENSE). APOD images and text retain their original credits and rights.

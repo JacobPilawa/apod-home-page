@@ -22,7 +22,7 @@ main { max-width: 1200px; margin: 28px auto 0; padding: 0 28px; }
 .date-arrow { display: flex; justify-content: center; align-items: center; height: 32px; border: 0; border-radius: 50%; color: var(--accent); background: transparent; font-size: 26px; line-height: 1; }
 .date-arrow:hover:enabled { background: var(--soft); }
 .return-today { display: block; margin: -8px auto 12px; font-size: 11px; }
-.media { height: clamp(180px, min(58.5vh, calc(100dvh - 300px)), 630px); display: flex; align-items: center; justify-content: center; border-radius: 12px; overflow: hidden; }
+.media { height: clamp(180px, min(58.5vh, calc(100dvh - 340px)), 630px); display: flex; align-items: center; justify-content: center; border-radius: 12px; overflow: hidden; }
 .media img { display: block; width: 100%; height: 100%; object-fit: contain; border-radius: 10px; }
 .media-message { background: var(--hover); width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; gap: 12px; color: var(--muted); border-radius: 12px; }
 .media-message a { color: var(--accent); }
@@ -53,7 +53,7 @@ dialog::backdrop { background: #151d3060; backdrop-filter: blur(4px); }
 .dialog-heading { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
 h2 { font-size: 22px; font-weight: 550; margin: 0; letter-spacing: -.5px; }
 .theme-label { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-select, .shortcut-row input { padding: 9px 10px; border: 1px solid var(--border); border-radius: 8px; color: var(--fg); background: var(--bg); min-width: 0; }
+select, .shortcut-row input, .location-fields input { padding: 9px 10px; border: 1px solid var(--border); border-radius: 8px; color: var(--fg); background: var(--bg); min-width: 0; }
 fieldset { border: 0; padding: 0; margin: 26px 0 0; }
 legend { padding: 0; margin-bottom: 10px; font-weight: 600; }
 .radio-label { display: block; margin: 8px 0; }
@@ -68,5 +68,23 @@ legend { padding: 0; margin-bottom: 10px; font-weight: 600; }
 .primary-button { background: var(--accent); color: var(--bg); border-color: var(--accent); }
 .dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
 .error { color: #cf5050; font-size: 12px; }
+.sky-strip { display: flex; width: max-content; max-width: 100%; gap: 6px; margin: 0 auto 12px; overflow-x: auto; scrollbar-width: none; }
+.sky-strip::-webkit-scrollbar { display: none; }
+.sky-fact { position: relative; display: flex; align-items: baseline; flex: 0 0 auto; gap: 6px; padding: 5px 9px; border-radius: 6px; background: var(--sky-bg); white-space: nowrap; }
+.sky-fact dt { color: var(--muted); font-size: 10px; line-height: 1.5; }
+.sky-fact dd { margin: 0; color: var(--fg); font-size: 11px; font-weight: 500; line-height: 1.5; }
+.sunrise-fact { --sky-bg: var(--sunrise-bg, #fff5e7); }
+.sunset-fact { --sky-bg: var(--sunset-bg, #fff0ec); }
+.moonrise-fact { --sky-bg: var(--moonrise-bg, #f0f3fc); }
+.moonset-fact { --sky-bg: var(--moonset-bg, #f3f0fb); }
+.phase-fact { --sky-bg: var(--phase-bg, #eff6f4); }
+#moon-illumination { color: var(--muted); font-weight: 400; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.location-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.location-fields label { display: flex; flex-direction: column; gap: 5px; font-size: 12px; }
+.location-actions { display: flex; gap: 14px; align-items: center; margin-top: 12px; }
+#sky-location-status { color: var(--muted); font-size: 12px; }
+:root[data-theme="dark"] .sky-strip { --sunrise-bg: #2d271e; --sunset-bg: #302321; --moonrise-bg: #202634; --moonset-bg: #292333; --phase-bg: #1e2c29; }
+@media (prefers-color-scheme: dark) { :root[data-theme="system"] .sky-strip { --sunrise-bg: #2d271e; --sunset-bg: #302321; --moonrise-bg: #202634; --moonset-bg: #292333; --phase-bg: #1e2c29; } }
 @media (max-width: 1000px) { .shortcuts-grid { max-width: 600px; margin: auto; } .shortcut { flex-basis: calc((100% - 32px) / 5); } }
 @media (max-width: 600px) { main { padding: 0 20px 64px; margin-top: 20px; } .media { height: 45vh; min-height: 270px; } h1 { font-size: 21px; } .shortcut { flex-basis: calc((100% - 24px) / 4); } .shortcuts { margin-top: 24px; } dialog { padding: 20px; } .shortcut-row { grid-template-columns: 1fr auto; } .shortcut-row input:nth-child(2) { grid-column: 1; grid-row: 2; } .row-controls { grid-column: 2; grid-row: 1 / 3; } }

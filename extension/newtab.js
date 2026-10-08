@@ -1,5 +1,6 @@
 import { fetchPicture } from './lib/apod.js';
 import { DEFAULT_SETTINGS, MAX_SHORTCUTS, FIRST_APOD_DAY, dayKey, pictureDay, offsetDay, formatPictureDay, readSettings, shouldRefresh, validateShortcuts } from './lib/model.js';
+import { prepareLocationSettings, readLocationInputs } from './sky.js';
 
 const $ = id => document.getElementById(id);
 let settings = { ...DEFAULT_SETTINGS };
@@ -38,6 +39,7 @@ function mediaMessage(text, url, label = 'Open on APOD ↗') {
 
 function renderPicture(data) {
   displayedDay = pictureDay(data.dateKey || data.date);
+  document.dispatchEvent(new CustomEvent('apod-day-changed', { detail: displayedDay }));
   $('picture-date').dateTime = displayedDay;
   $('picture-date').textContent = formatPictureDay(displayedDay);
   $('picture-title').textContent = data.title;
@@ -194,6 +196,7 @@ function renderDraft(focusIndex = -1) {
 }
 
 function openSettings(add = false) {
+  prepareLocationSettings();
   draft = settings.shortcuts.map(site => ({ ...site }));
   $('theme').value = settings.theme;
   const mode = add ? 'custom' : settings.shortcutMode;
@@ -232,7 +235,7 @@ $('settings-form').addEventListener('submit', async event => {
     const mode = document.querySelector('input[name="shortcut-mode"]:checked').value;
     collectDraft();
     const next = { theme: $('theme').value, shortcutMode: mode, shortcuts: mode === 'custom' ? validateShortcuts(draft) : settings.shortcuts };
-    await chrome.storage.local.set({ settings: next });
+    await chrome.storage.local.set({ settings: next, observerLocation: readLocationInputs() });
     settings = next;
     applyTheme();
     renderShortcuts();

@@ -8,4 +8,6 @@ Chrome's most-visited site list is used only to render local shortcuts. Site nam
 
 Preferences, custom shortcuts, and the most recently successful APOD's text, date, credits, and image URLs are saved in `chrome.storage.local`. This extension does not use Chrome Sync. Images are not separately archived by the extension. Uninstalling removes locally saved extension data.
 
+Sun and moon times are calculated locally. Chrome handles automatic location detection; the extension caches rounded coordinates locally for five minutes. You can enter coordinates instead in Customize. Coordinates are not sent to APOD or an astronomy service.
+
 The extension has no permission to read your full browsing history, arbitrary tabs, page content on sites you visit, or cookies. It does not inject content scripts into websites. External HTML is parsed in a detached document, and extracted captions and shortcut names are rendered as text.

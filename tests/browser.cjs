@@ -24,7 +24,7 @@ async function run() {
   try {
     context = await chromium.launchPersistentContext(profile, {
       ...(process.env.APOD_BROWSER_EXECUTABLE ? { executablePath: process.env.APOD_BROWSER_EXECUTABLE } : { channel: 'chromium' }),
-      headless: true, viewport: { width: 1440, height: 1000 },
+      headless: true, viewport: { width: 1440, height: 1000 }, timezoneId: 'America/Los_Angeles', locale: 'en-US',
       args: [`--disable-extensions-except=${extension}`, `--load-extension=${extension}`]
     });
     let mode = 'image';
@@ -35,6 +35,10 @@ async function run() {
         constructor(...args) { super(...(args.length ? args : ['2026-10-08T16:00:00Z'])); }
         static now() { return new RealDate('2026-10-08T16:00:00Z').getTime(); }
       };
+      Object.defineProperty(navigator.geolocation, 'getCurrentPosition', { value: (success, failure) => {
+        if (window.blockLocation) failure({ code: 1, message: 'Location denied' });
+        else success({ coords: { latitude: 37.7749, longitude: -122.4194 } });
+      } });
     });
     const pixel = await fs.readFile(path.join(extension, 'icons/new-tab32.png'));
     await context.route('https://**/*', async route => {
@@ -62,6 +66,30 @@ async function run() {
     await page.waitForFunction(() => document.getElementById('picture-title')?.textContent === 'A Test Nebula');
     const id = await page.evaluate(() => chrome.runtime.id);
     assert.ok(id, 'New Tab is served by the loaded extension');
+    await page.waitForFunction(() => document.getElementById('sunrise-time').textContent === '7:12 AM');
+    assert.equal(await page.locator('#sunset-time').textContent(), '6:42 PM');
+    assert.equal(await page.locator('#moonrise-time').textContent(), '5:09 AM');
+    assert.equal(await page.locator('#moonset-time').textContent(), '5:38 PM');
+    assert.equal(await page.locator('#moon-phase').textContent(), 'Waning crescent');
+    assert.equal(await page.locator('#moon-illumination').textContent(), '· 5%');
+    assert.equal(await page.locator('.sky-fact').count(), 5);
+    const automaticLocation = await page.evaluate(async () => (await chrome.storage.local.get('observerLocation')).observerLocation);
+    assert.deepEqual([automaticLocation.latitude, automaticLocation.longitude, automaticLocation.automatic], [37.77, -122.42, true]);
+    // Location failure keeps phase available, and manual coordinates are a fallback.
+    await page.evaluate(async () => { window.blockLocation = true; await chrome.storage.local.remove('observerLocation'); });
+    await page.waitForFunction(() => document.getElementById('sunrise-time').textContent === '—');
+    assert.equal(await page.locator('#moon-phase').textContent(), 'Waning crescent');
+    await page.locator('#settings-button').click();
+    await page.locator('#sky-latitude').fill('37.77');
+    await page.getByRole('button', { name: 'Save changes', exact: true }).click();
+    assert.match(await page.locator('#settings-error').textContent(), /longitude/);
+    await page.locator('#sky-longitude').fill('-122.42');
+    await page.getByRole('button', { name: 'Save changes', exact: true }).click();
+    await page.waitForFunction(() => document.getElementById('sunrise-time').textContent === '7:12 AM');
+    await page.locator('#settings-button').click();
+    await page.locator('#sky-latitude').fill('0');
+    await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+    assert.equal(await page.evaluate(async () => (await chrome.storage.local.get('observerLocation')).observerLocation.latitude), 37.77);
     assert.equal(await page.locator('#picture-credit').textContent(), 'Image Credit & Copyright: Example Artist');
     assert.match(await page.locator('#explanation').textContent(), /Stars light its clouds/);
     assert.ok(!(await page.locator('#explanation').textContent()).includes('Tomorrow'));
@@ -88,6 +116,7 @@ async function run() {
     // daily cache separate so new tabs always return to the latest picture.
     await page.locator('#previous-day').click();
     await page.waitForFunction(() => document.getElementById('picture-title').textContent === 'Yesterday’s Test Galaxy');
+    assert.match(await page.locator('#sunrise-time').getAttribute('title'), /10\/7\/2026/);
     assert.equal(await page.locator('#picture-details').isVisible(), false, 'a newly selected picture starts with its details hidden');
     assert.equal(await page.locator('#picture-date').textContent(), 'October 7, 2026');
     assert.equal(await page.locator('#next-day').isDisabled(), false);
@@ -181,6 +210,8 @@ async function run() {
     for (const height of [800, 600]) {
       await page.setViewportSize({ width: 1440, height });
       assert.equal(await page.locator('a.shortcut').evaluateAll(nodes => nodes.every(el => el.getBoundingClientRect().bottom <= innerHeight)), true, 'shortcuts stay visible on shorter desktop windows with details closed');
+      const strip = await page.locator('.sky-strip').boundingBox();
+      assert.ok(strip.height < 30, 'sun and moon info stays in one thin row');
     }
     await page.setViewportSize({ width: 390, height: 844 });
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);

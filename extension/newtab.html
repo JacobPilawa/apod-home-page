@@ -19,6 +19,13 @@
         <button id="next-day" class="date-arrow" type="button" aria-label="Next day's APOD" disabled>›</button>
       </nav>
       <button id="today-button" class="text-button return-today" type="button" hidden>Today</button>
+      <dl class="sky-strip" aria-label="Local sun and moon for this date">
+        <div class="sky-fact sunrise-fact"><dt>Sunrise</dt><dd id="sunrise-time">—</dd></div>
+        <div class="sky-fact sunset-fact"><dt>Sunset</dt><dd id="sunset-time">—</dd></div>
+        <div class="sky-fact moonrise-fact"><dt>Moonrise</dt><dd id="moonrise-time">—</dd></div>
+        <div class="sky-fact moonset-fact"><dt>Moonset</dt><dd id="moonset-time">—</dd></div>
+        <div class="sky-fact phase-fact"><dt class="sr-only">Moon phase and illumination</dt><dd><span id="moon-phase">—</span> <span id="moon-illumination"></span></dd></div>
+      </dl>
       <div id="media" class="media"><div class="media-message">Loading APOD…</div></div>
       <h1><button id="details-toggle" class="title-toggle" type="button" aria-expanded="false" aria-controls="picture-details" disabled>
         <span id="picture-title">Loading…</span>
@@ -42,6 +49,15 @@
     <form id="settings-form">
       <div class="dialog-heading"><h2 id="settings-title">Customize</h2><button id="close-settings" class="quiet-button" type="button" aria-label="Close customization">✕</button></div>
       <label class="theme-label" for="theme">Appearance<select id="theme"><option value="light">Light</option><option value="dark">Dark</option><option value="system">Match device</option></select></label>
+      <fieldset class="sky-location-settings"><legend>Local sun and moon</legend>
+        <p class="settings-hint">Location and time zone are automatic. Enter coordinates here to override the location.</p>
+        <div class="location-fields">
+          <label>Latitude<input id="sky-latitude" type="number" min="-90" max="90" step="any" placeholder="e.g. 37.77"></label>
+          <label>Longitude<input id="sky-longitude" type="number" min="-180" max="180" step="any" placeholder="e.g. -122.42"></label>
+        </div>
+        <div class="location-actions"><button id="use-sky-location" class="secondary-button" type="button">Detect location</button><button id="clear-sky-location" class="text-button" type="button">Use automatic</button></div>
+        <p id="sky-location-status" role="status"></p>
+      </fieldset>
       <fieldset><legend>Site shortcuts</legend>
         <label class="radio-label"><input type="radio" name="shortcut-mode" value="automatic"> Most visited <span>Follow your browsing automatically.</span></label>
         <label class="radio-label"><input type="radio" name="shortcut-mode" value="custom"> My shortcuts <span>Choose your sites and their order.</span></label>
