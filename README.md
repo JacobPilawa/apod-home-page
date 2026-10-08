@@ -19,6 +19,7 @@ No build step or dependency installation is needed.
 
 ## Notes
 
+- If the rise/set times show dashes, allow **Location** in Chrome’s address-bar permissions, then open a fresh tab.
 - **Customize** lets you edit shortcuts and change the appearance. Chrome supplies most-visited sites automatically; manually customized shortcuts need adding once.
 - To hide Chrome's bottom banner, right-click it and choose **Hide footer on New Tab page**.
 - No API key or account is needed. Settings stay in your browser. See [Privacy](PRIVACY.md).
