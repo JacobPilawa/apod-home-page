@@ -2,7 +2,7 @@
 
 I wanted to see the [Astronomy Picture of the Day (APOD)](https://apod.com/en/) automatically every day, but I also wanted to keep the familiar Chrome New Tab layout and site shortcuts. So I made a small extension that combines the two.
 
-It shows the daily image and explanation above your shortcuts. The arrows let you browse earlier days, and **Today** takes you back to the latest picture.
+It shows the daily image above your shortcuts. Click the image title to show or hide its credits and explanation. The arrows let you browse earlier days, and **Today** takes you back to the latest picture.
 
 ## Install
 

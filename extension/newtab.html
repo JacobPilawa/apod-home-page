@@ -17,14 +17,16 @@
         <time id="picture-date"></time>
         <button id="next-day" class="date-arrow" type="button" aria-label="Next day's APOD" disabled>›</button>
       </nav>
+      <button id="today-button" class="text-button return-today" type="button" hidden>Today</button>
       <div id="media" class="media"><div class="media-message">Finding today's corner of the universe…</div></div>
-      <h1 id="picture-title">Discover the cosmos</h1>
-      <p id="picture-credit" class="credit"></p>
-      <p id="explanation" class="explanation collapsed"></p>
-      <div class="picture-actions">
-        <button id="caption-toggle" class="text-button" type="button" aria-expanded="false" aria-controls="explanation" hidden>Read explanation</button>
-        <button id="today-button" class="text-button" type="button">Today</button>
-        <a id="source-link" href="https://apod.com/en/">View on APOD ↗</a>
+      <h1><button id="details-toggle" class="title-toggle" type="button" aria-expanded="false" aria-controls="picture-details" disabled>
+        <span id="picture-title">Discover the cosmos</span>
+        <span class="details-hint"><span id="details-cue">Click for details</span><span id="details-chevron" aria-hidden="true">⌄</span></span>
+      </button></h1>
+      <div id="picture-details" hidden>
+        <p id="picture-credit" class="credit"></p>
+        <p id="explanation" class="explanation"></p>
+        <div class="picture-actions"><a id="source-link" href="https://apod.com/en/">View on APOD ↗</a></div>
       </div>
       <p id="status" class="status" role="status"></p>
     </section>

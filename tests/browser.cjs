@@ -71,13 +71,25 @@ async function run() {
     assert.equal(await page.locator('#picture-date').textContent(), 'October 8, 2026');
     assert.equal(await page.locator('#next-day').isDisabled(), true, 'tomorrow is not published yet');
     assert.equal(await page.locator('#refresh-button, footer').count(), 0);
-    await page.locator('#caption-toggle').click();
-    assert.equal(await page.locator('#caption-toggle').getAttribute('aria-expanded'), 'true');
+    assert.equal(await page.locator('#picture-details').isVisible(), false);
+    assert.equal(await page.locator('#picture-credit').isVisible(), false);
+    assert.equal(await page.locator('#explanation').isVisible(), false);
+    assert.equal(await page.locator('#details-cue').textContent(), 'Click for details');
+    await page.locator('#details-toggle').click();
+    assert.equal(await page.locator('#details-toggle').getAttribute('aria-expanded'), 'true');
+    assert.equal(await page.locator('#picture-credit').isVisible(), true);
+    assert.equal(await page.locator('#explanation').isVisible(), true);
+    assert.equal(await page.locator('#source-link').isVisible(), true);
+    await page.locator('#details-toggle').press('Enter');
+    assert.equal(await page.locator('#picture-details').isVisible(), false);
+    await page.locator('#details-toggle').press('Space');
+    assert.equal(await page.locator('#picture-details').isVisible(), true);
 
     // Date navigation falls back to the exact NASA archive entry and keeps the
     // daily cache separate so new tabs always return to the latest picture.
     await page.locator('#previous-day').click();
     await page.waitForFunction(() => document.getElementById('picture-title').textContent === 'Yesterday’s Test Galaxy');
+    assert.equal(await page.locator('#picture-details').isVisible(), false, 'a newly selected picture starts with its details hidden');
     assert.equal(await page.locator('#picture-date').textContent(), 'October 7, 2026');
     assert.equal(await page.locator('#next-day').isDisabled(), false);
     await page.locator('#previous-day').click();
@@ -92,6 +104,7 @@ async function run() {
     await page.waitForFunction(() => document.getElementById('picture-date').textContent === 'October 7, 2026');
     await page.reload();
     await page.waitForFunction(() => document.getElementById('picture-date').textContent === 'October 8, 2026');
+    assert.equal(await page.locator('#picture-details').isVisible(), false, 'fresh tabs start with details hidden');
 
     // Customize, reject executable URLs, save, reorder, and persist across tabs.
     await page.locator('#settings-button').click();
@@ -128,13 +141,20 @@ async function run() {
     await page.locator('#cancel-settings').click();
     assert.equal(await page.locator('.shortcut-name').first().textContent(), 'Other site');
 
+    await page.locator('#previous-day').click();
+    await page.waitForFunction(() => document.getElementById('picture-date').textContent === 'October 7, 2026');
     mode = 'fallback';
     await page.locator('#today-button').click();
     await page.waitForFunction(() => document.getElementById('picture-title').textContent === 'A Test Galaxy');
     assert.equal(await page.locator('#source-link').getAttribute('href'), 'https://science.nasa.gov/image-article/today/');
     assert.equal(await page.locator('#picture-credit').textContent(), 'Image credit: Example Photographer');
     mode = 'offline';
-    await page.locator('#today-button').click();
+    await page.evaluate(async () => {
+      const saved = await chrome.storage.local.get('apodCache');
+      saved.apodCache.checkedAt -= 3600001;
+      await chrome.storage.local.set(saved);
+    });
+    await page.reload();
     await page.waitForFunction(() => document.getElementById('status').textContent.includes('last saved'));
     assert.equal(await page.locator('#picture-title').textContent(), 'A Test Galaxy');
     assert.equal(await page.locator('.shortcut-name').first().textContent(), 'Other site');
@@ -159,6 +179,10 @@ async function run() {
     await page.waitForFunction(() => document.querySelectorAll('a.shortcut').length === 10);
     const y = await page.locator('a.shortcut').evaluateAll(nodes => nodes.map(el => el.getBoundingClientRect().y));
     assert.ok(y.every(value => value === y[0]), 'ten site icons fit in a single desktop row');
+    for (const height of [800, 600]) {
+      await page.setViewportSize({ width: 1440, height });
+      assert.equal(await page.locator('a.shortcut').evaluateAll(nodes => nodes.every(el => el.getBoundingClientRect().bottom <= innerHeight)), true, 'shortcuts stay visible on shorter desktop windows with details closed');
+    }
     await page.setViewportSize({ width: 390, height: 844 });
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
     await page.locator('#settings-button').click();

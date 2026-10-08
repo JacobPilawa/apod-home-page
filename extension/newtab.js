@@ -17,6 +17,7 @@ function updateNavigation() {
   $('previous-day').disabled = refreshing || !displayedDay || displayedDay <= FIRST_APOD_DAY;
   $('next-day').disabled = refreshing || !displayedDay || displayedDay >= dayKey();
   $('today-button').disabled = refreshing;
+  $('today-button').hidden = displayedDay === dayKey() && !$('status').textContent;
   $('next-day').title = displayedDay >= dayKey() ? 'Tomorrow’s APOD has not been published yet.' : 'Next day';
 }
 
@@ -44,10 +45,8 @@ function renderPicture(data) {
   $('explanation').textContent = data.explanation;
   $('source-link').href = data.sourceUrl;
   $('source-link').title = `APOD · ${data.date}`;
-  $('caption-toggle').hidden = false;
-  $('caption-toggle').textContent = 'Read explanation';
-  $('caption-toggle').setAttribute('aria-expanded', 'false');
-  $('explanation').classList.add('collapsed');
+  $('details-toggle').disabled = false;
+  setDetailsExpanded(false);
   if (data.mediaType !== 'image') {
     mediaMessage('Today’s APOD is a video. Enjoy it on the original page.', data.sourceUrl, 'Watch today’s APOD ↗');
   } else {
@@ -241,12 +240,13 @@ $('settings-form').addEventListener('submit', async event => {
     $('settings-dialog').close();
   } catch (error) { $('settings-error').textContent = error.message || 'Could not save your changes.'; }
 });
-$('caption-toggle').addEventListener('click', () => {
-  const expanded = $('caption-toggle').getAttribute('aria-expanded') !== 'true';
-  $('caption-toggle').setAttribute('aria-expanded', String(expanded));
-  $('caption-toggle').textContent = expanded ? 'Show less' : 'Read explanation';
-  $('explanation').classList.toggle('collapsed', !expanded);
-});
+function setDetailsExpanded(expanded) {
+  $('details-toggle').setAttribute('aria-expanded', String(expanded));
+  $('picture-details').hidden = !expanded;
+  $('details-cue').textContent = expanded ? 'Click to hide details' : 'Click for details';
+  $('details-chevron').textContent = expanded ? '⌃' : '⌄';
+}
+$('details-toggle').addEventListener('click', () => setDetailsExpanded($('details-toggle').getAttribute('aria-expanded') !== 'true'));
 $('today-button').addEventListener('click', () => refreshPicture(true));
 $('previous-day').addEventListener('click', () => { if (displayedDay) refreshPicture(true, offsetDay(displayedDay, -1)); });
 $('next-day').addEventListener('click', () => { if (displayedDay) refreshPicture(true, offsetDay(displayedDay, 1)); });
