@@ -8,7 +8,7 @@ Sunrise, sunset, moonrise, moonset, and moon phase appear in a small row above t
 
 ![APOD Home Page showing Saturn, local sun and moon times, and site shortcuts](docs/example.png)
 
-October 8, 2026, with example shortcuts and San Francisco times. APOD image credit: Tom Williams.
+Example homepage.
 
 ## Install
 
