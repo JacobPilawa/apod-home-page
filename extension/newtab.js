@@ -48,7 +48,7 @@ function renderPicture(data) {
   $('details-toggle').disabled = false;
   setDetailsExpanded(false);
   if (data.mediaType !== 'image') {
-    mediaMessage('Today’s APOD is a video. Enjoy it on the original page.', data.sourceUrl, 'Watch today’s APOD ↗');
+    mediaMessage('Today’s APOD is a video.', data.sourceUrl, 'Watch on APOD ↗');
   } else {
     const image = document.createElement('img');
     image.alt = data.alt || data.title;
@@ -94,7 +94,7 @@ async function refreshPicture(force = false, requestedDay = null) {
     } else if (displayedDay) {
       $('status').textContent = 'Showing the last saved APOD. Today’s update is unavailable; try Today again.';
     } else {
-      mediaMessage('The cosmos will be back shortly. APOD is unavailable right now.', 'https://apod.com/en/');
+      mediaMessage('APOD is unavailable right now.', 'https://apod.com/en/');
       $('status').textContent = 'Try Today again. Your site shortcuts work independently.';
       document.querySelector('.apod').setAttribute('aria-busy', 'false');
     }
@@ -132,7 +132,6 @@ function renderShortcuts() {
     link.append(circle, title);
     return link;
   });
-  // Keep a full row of ten sites aligned like Chrome's original layout.
   if (sites.length < 10) {
     const add = document.createElement('button');
     add.type = 'button';
@@ -279,8 +278,8 @@ async function init() {
   });
 }
 init().catch(error => {
-  console.warn('APOD New Tab could not initialize:', error);
-  mediaMessage('Load this folder as a Chrome extension to use APOD New Tab.');
+  console.warn('APOD Home Page could not initialize:', error);
+  mediaMessage('Load the extension folder through chrome://extensions.');
   $('status').textContent = 'See the README for installation instructions.';
   document.querySelector('.apod').setAttribute('aria-busy', 'false');
 });

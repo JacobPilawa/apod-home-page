@@ -1,13 +1,13 @@
 {
   "manifest_version": 3,
-  "name": "APOD New Tab",
+  "name": "APOD Home Page",
   "version": "1.0.0",
-  "description": "A little cosmos in every new tab. Today's astronomy picture, its explanation, and your favorite sites.",
+  "description": "The daily Astronomy Picture of the Day with site shortcuts on Chrome's New Tab page.",
   "minimum_chrome_version": "109",
   "chrome_url_overrides": { "newtab": "newtab.html" },
   "permissions": ["storage", "topSites", "favicon"],
   "host_permissions": ["https://apod.com/*", "https://science.nasa.gov/*"],
-  "icons": { "16": "icons/icon16.png", "48": "icons/icon48.png", "128": "icons/icon128.png" },
+  "icons": { "16": "icons/new-tab16.png", "32": "icons/new-tab32.png" },
   "content_security_policy": {
     "extension_pages": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' https:; connect-src 'self' https://apod.com https://science.nasa.gov; object-src 'none'; base-uri 'none'; frame-src 'none'"
   }

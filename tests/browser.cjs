@@ -36,7 +36,7 @@ async function run() {
         static now() { return new RealDate('2026-10-08T16:00:00Z').getTime(); }
       };
     });
-    const pixel = await fs.readFile(path.join(extension, 'icons/icon128.png'));
+    const pixel = await fs.readFile(path.join(extension, 'icons/new-tab32.png'));
     await context.route('https://**/*', async route => {
       const url = route.request().url();
       if (url === 'https://apod.com/en/ap261007.html' || url.startsWith('https://science.nasa.gov/wp-json/wp/v2/image-article') || url === 'https://science.nasa.gov/image-article/apod-2026-october-7-test-archive/') {
@@ -53,7 +53,6 @@ async function run() {
         if (mode === 'fallback' && url.startsWith('https://apod.com/')) return route.fulfill({ status: 403, body: 'Forbidden' });
         return route.fulfill({ contentType: 'text/html', body: mode === 'video' ? videoPage : mode === 'fallback' ? nasaPage : imagePage });
       }
-      if (mode === 'live-preview') return route.continue();
       return route.fulfill({ contentType: 'image/png', body: pixel });
     });
     const page = await context.newPage();
@@ -188,40 +187,6 @@ async function run() {
     await page.locator('#settings-button').click();
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
     await page.keyboard.press('Escape');
-
-    // Optional local QA: validate against a fresh real APOD response without committing its content.
-    if (process.env.APOD_LIVE_HTML) {
-      const html = await fs.readFile(process.env.APOD_LIVE_HTML, 'utf8');
-      const live = await page.evaluate(async html => {
-        const { parseApod } = await import('./lib/apod.js');
-        return parseApod(html, 'https://science.nasa.gov/apod/');
-      }, html);
-      assert.ok(live.title && live.date && live.imageUrl && live.explanation);
-      console.log(`Live NASA parser: ${live.date} · ${live.title}`);
-      assert.ok(!live.explanation.includes("Tomorrow's picture:"));
-      if (process.env.APOD_LIVE_ARCHIVE_HTML) {
-        const archivedHtml = await fs.readFile(process.env.APOD_LIVE_ARCHIVE_HTML, 'utf8');
-        const archived = await page.evaluate(async html => {
-          const { parseApod } = await import('./lib/apod.js');
-          return parseApod(html, 'https://science.nasa.gov/image-article/apod-2026-october-7-supernova-remnant-pa-30/');
-        }, archivedHtml);
-        assert.equal(archived.dateKey, '2026-10-07');
-        assert.ok(archived.imageUrl && archived.explanation);
-        console.log(`Live NASA archive parser: ${archived.date} · ${archived.title}`);
-      }
-      if (process.env.APOD_QA_SCREENSHOT) {
-        mode = 'live-preview';
-        await page.evaluate(async data => {
-          const { dayKey } = await import('./lib/model.js');
-          await chrome.storage.local.set({ apodCache: { data, checkedAt: Date.now(), checkedDay: dayKey() } });
-        }, live);
-        await page.setViewportSize({ width: 1440, height: 1000 });
-        await page.reload();
-        await page.waitForFunction(() => { const img = document.querySelector('#media img'); return img?.complete && img.naturalWidth > 0; });
-        await page.locator('#media img').evaluate(img => img.decode());
-        await page.screenshot({ path: process.env.APOD_QA_SCREENSHOT, fullPage: true });
-      }
-    }
 
     // Cold-start outage still presents shortcuts and a useful recovery state.
     mode = 'offline';

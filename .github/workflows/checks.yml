@@ -16,5 +16,5 @@ jobs:
       - run: npm run package
       - uses: actions/upload-artifact@v4
         with:
-          name: apod-new-tab
+          name: apod-home-page
           path: dist/*.zip

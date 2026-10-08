@@ -1,6 +1,6 @@
 # Privacy
 
-APOD New Tab has no analytics, telemetry, advertising, account system, or developer-operated backend.
+APOD Home Page has no analytics, advertising, accounts, or backend.
 
 The extension reads the daily page from `apod.com`, with `science.nasa.gov` as a fallback. Date navigation requests dated APOD pages and, when needed, NASA's public archive search endpoint; the search includes only the chosen date. It displays the HTTPS image linked by that page, which may be hosted elsewhere. These hosts receive normal network information, including your IP address and browser request headers. Page requests omit credentials and image requests omit the referrer. Chrome's own network behavior and the hosting websites' privacy policies still apply.
 

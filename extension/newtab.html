@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
   <title>New Tab</title>
-  <link rel="icon" type="image/png" href="icons/blank-tab.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/new-tab16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/new-tab32.png">
   <link rel="stylesheet" href="newtab.css">
   <script type="module" src="newtab.js"></script>
 </head>
@@ -18,9 +19,9 @@
         <button id="next-day" class="date-arrow" type="button" aria-label="Next day's APOD" disabled>›</button>
       </nav>
       <button id="today-button" class="text-button return-today" type="button" hidden>Today</button>
-      <div id="media" class="media"><div class="media-message">Finding today's corner of the universe…</div></div>
+      <div id="media" class="media"><div class="media-message">Loading APOD…</div></div>
       <h1><button id="details-toggle" class="title-toggle" type="button" aria-expanded="false" aria-controls="picture-details" disabled>
-        <span id="picture-title">Discover the cosmos</span>
+        <span id="picture-title">Loading…</span>
         <span class="details-hint"><span id="details-cue">Click for details</span><span id="details-chevron" aria-hidden="true">⌄</span></span>
       </button></h1>
       <div id="picture-details" hidden>
@@ -32,14 +33,14 @@
     </section>
     <nav class="shortcuts" aria-label="Favorite sites">
       <div id="shortcuts-grid" class="shortcuts-grid"></div>
-      <p id="shortcuts-empty" class="empty-hint" hidden>Your favorite sites belong here. Add a shortcut in Customize.</p>
+      <p id="shortcuts-empty" class="empty-hint" hidden>Add shortcuts in Customize.</p>
     </nav>
   </main>
   <button id="settings-button" class="quiet-button" type="button">Customize</button>
 
   <dialog id="settings-dialog" aria-labelledby="settings-title">
     <form id="settings-form">
-      <div class="dialog-heading"><h2 id="settings-title">Make yourself at home</h2><button id="close-settings" class="quiet-button" type="button" aria-label="Close customization">✕</button></div>
+      <div class="dialog-heading"><h2 id="settings-title">Customize</h2><button id="close-settings" class="quiet-button" type="button" aria-label="Close customization">✕</button></div>
       <label class="theme-label" for="theme">Appearance<select id="theme"><option value="light">Light</option><option value="dark">Dark</option><option value="system">Match device</option></select></label>
       <fieldset><legend>Site shortcuts</legend>
         <label class="radio-label"><input type="radio" name="shortcut-mode" value="automatic"> Most visited <span>Follow your browsing automatically.</span></label>

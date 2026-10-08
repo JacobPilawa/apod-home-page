@@ -6,7 +6,7 @@ import json
 root = Path(__file__).resolve().parent.parent
 extension = root / "extension"
 version = json.loads((extension / "manifest.json").read_text())["version"]
-output = root / "dist" / f"apod-new-tab-{version}.zip"
+output = root / "dist" / f"apod-home-page-{version}.zip"
 output.parent.mkdir(exist_ok=True)
 with ZipFile(output, "w", ZIP_DEFLATED) as archive:
     for path in sorted(extension.rglob("*")):

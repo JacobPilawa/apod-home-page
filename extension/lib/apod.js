@@ -1,6 +1,6 @@
 import { safeRemoteUrl, pictureDay, formatPictureDay, FIRST_APOD_DAY, dayKey } from './model.js';
 
-export const SOURCES = ['https://apod.com/en/', 'https://science.nasa.gov/apod/'];
+const SOURCES = ['https://apod.com/en/', 'https://science.nasa.gov/apod/'];
 const clean = value => (value || '').replace(/\s+/g, ' ').trim();
 const explanationText = node => clean(node?.textContent).replace(/^Explanation:\s*/i, '').split(/Tomorrow['’]s (?:picture|image):/i)[0].trim();
 
@@ -24,7 +24,6 @@ function parseNasa(hero, base) {
     explanation: explanationText(hero.querySelector('.media-detail-hero__description')),
     mediaType: image ? 'image' : 'video',
     imageUrl: image ? safeRemoteUrl(image.getAttribute('src'), base) : null,
-    fullImageUrl: image ? safeRemoteUrl(image.getAttribute('src'), base) : null,
     alt: clean(image?.getAttribute('alt')), sourceUrl
   });
 }
@@ -44,7 +43,6 @@ function parseClassic(doc, base) {
     title: clean(titleNode?.textContent), date, credit,
     explanation: explanationText(paragraph), mediaType: image ? 'image' : 'video',
     imageUrl: image ? safeRemoteUrl(image.getAttribute('src'), base) : null,
-    fullImageUrl: image ? safeRemoteUrl(image.closest('a')?.getAttribute('href') || image.getAttribute('src'), base) : null,
     alt: clean(image?.getAttribute('alt')), sourceUrl: base
   });
 }

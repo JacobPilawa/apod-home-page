@@ -13,10 +13,12 @@ It shows the daily image above your shortcuts. Click the image title to show or 
 
 Keep the folder on your computer. After updating its files, reload the extension at `chrome://extensions`.
 
+No build step or dependency installation is needed.
+
 ## Notes
 
 - **Customize** lets you edit shortcuts and change the appearance. Chrome supplies most-visited sites automatically; manually customized shortcuts need adding once.
 - To hide Chrome's bottom banner, right-click it and choose **Hide footer on New Tab page**.
 - No API key or account is needed. Settings stay in your browser. See [Privacy](PRIVACY.md).
 
-The code is [MIT licensed](LICENSE). APOD images and text retain their original credits and rights.
+The code is [MIT licensed](LICENSE). The gray New Tab icons are from [Chromium](extension/icons/LICENSE). APOD images and text retain their original credits and rights.
