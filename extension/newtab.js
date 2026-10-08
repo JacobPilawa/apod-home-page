@@ -51,9 +51,6 @@ function renderPicture(data) {
   if (data.mediaType !== 'image') {
     mediaMessage('Today’s APOD is a video. Enjoy it on the original page.', data.sourceUrl, 'Watch today’s APOD ↗');
   } else {
-    const link = document.createElement('a');
-    link.href = data.fullImageUrl || data.imageUrl;
-    link.title = 'Open the full image';
     const image = document.createElement('img');
     image.alt = data.alt || data.title;
     image.referrerPolicy = 'no-referrer';
@@ -62,8 +59,7 @@ function renderPicture(data) {
       if (image.isConnected) mediaMessage('The image could not load. Your shortcuts are still ready.', data.sourceUrl);
     }, { once: true });
     image.src = data.imageUrl;
-    link.append(image);
-    $('media').replaceChildren(link);
+    $('media').replaceChildren(image);
   }
   document.querySelector('.apod').setAttribute('aria-busy', 'false');
 }
