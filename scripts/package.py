@@ -14,4 +14,7 @@ with ZipFile(output, "w", ZIP_DEFLATED) as archive:
             archive.write(path, path.relative_to(extension))
     for name in ("LICENSE", "PRIVACY.md", "README.md"):
         archive.write(root / name, name)
+    screenshot = root / "docs" / "example.png"
+    if screenshot.is_file():
+        archive.write(screenshot, "docs/example.png")
 print(output)

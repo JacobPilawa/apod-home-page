@@ -6,6 +6,10 @@ It shows the daily image above your shortcuts. Click the image title to show or 
 
 Sunrise, sunset, moonrise, moonset, and moon phase appear in a small row above the image. Location and time zone are detected automatically. You can override coordinates in **Customize**.
 
+![APOD Home Page showing Saturn, local sun and moon times, and site shortcuts](docs/example.png)
+
+October 8, 2026, with example shortcuts and San Francisco times. APOD image credit: Tom Williams.
+
 ## Install
 
 1. Download this repository using **Code → Download ZIP** and unzip it.
