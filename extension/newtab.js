@@ -245,7 +245,7 @@ $('settings-form').addEventListener('submit', async event => {
 function setDetailsExpanded(expanded) {
   $('details-toggle').setAttribute('aria-expanded', String(expanded));
   $('picture-details').hidden = !expanded;
-  $('details-cue').textContent = expanded ? 'Click to hide details' : 'Click for details';
+  $('details-cue').textContent = expanded ? 'Click to hide details' : 'Details';
   $('details-chevron').textContent = expanded ? '⌃' : '⌄';
 }
 $('details-toggle').addEventListener('click', () => setDetailsExpanded($('details-toggle').getAttribute('aria-expanded') !== 'true'));

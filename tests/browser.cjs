@@ -101,7 +101,7 @@ async function run() {
     assert.equal(await page.locator('#picture-details').isVisible(), false);
     assert.equal(await page.locator('#picture-credit').isVisible(), false);
     assert.equal(await page.locator('#explanation').isVisible(), false);
-    assert.equal(await page.locator('#details-cue').textContent(), 'Click for details');
+    assert.equal(await page.locator('#details-cue').textContent(), 'Details');
     await page.locator('#details-toggle').click();
     assert.equal(await page.locator('#details-toggle').getAttribute('aria-expanded'), 'true');
     assert.equal(await page.locator('#picture-credit').isVisible(), true);
