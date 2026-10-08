@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>New Tab · APOD</title>
+  <link rel="icon" href="icons/icon48.png">
+  <link rel="stylesheet" href="newtab.css">
+  <script type="module" src="newtab.js"></script>
+</head>
+<body>
+  <main>
+    <section class="apod" aria-labelledby="picture-title" aria-busy="true">
+      <nav class="date-navigation" aria-label="Browse APOD dates">
+        <button id="previous-day" class="date-arrow" type="button" aria-label="Previous day's APOD" disabled>‹</button>
+        <time id="picture-date"></time>
+        <button id="next-day" class="date-arrow" type="button" aria-label="Next day's APOD" disabled>›</button>
+      </nav>
+      <div id="media" class="media"><div class="media-message">Finding today's corner of the universe…</div></div>
+      <h1 id="picture-title">Discover the cosmos</h1>
+      <p id="picture-credit" class="credit"></p>
+      <p id="explanation" class="explanation collapsed"></p>
+      <div class="picture-actions">
+        <button id="caption-toggle" class="text-button" type="button" aria-expanded="false" aria-controls="explanation" hidden>Read explanation</button>
+        <button id="today-button" class="text-button" type="button">Today</button>
+        <a id="source-link" href="https://apod.com/en/">View on APOD ↗</a>
+      </div>
+      <p id="status" class="status" role="status"></p>
+    </section>
+    <nav class="shortcuts" aria-label="Favorite sites">
+      <div id="shortcuts-grid" class="shortcuts-grid"></div>
+      <p id="shortcuts-empty" class="empty-hint" hidden>Your favorite sites belong here. Add a shortcut in Customize.</p>
+    </nav>
+  </main>
+  <button id="settings-button" class="quiet-button" type="button">Customize</button>
+
+  <dialog id="settings-dialog" aria-labelledby="settings-title">
+    <form id="settings-form">
+      <div class="dialog-heading"><h2 id="settings-title">Make yourself at home</h2><button id="close-settings" class="quiet-button" type="button" aria-label="Close customization">✕</button></div>
+      <label class="theme-label" for="theme">Appearance<select id="theme"><option value="light">Light</option><option value="dark">Dark</option><option value="system">Match device</option></select></label>
+      <fieldset><legend>Site shortcuts</legend>
+        <label class="radio-label"><input type="radio" name="shortcut-mode" value="automatic"> Most visited <span>Follow your browsing automatically.</span></label>
+        <label class="radio-label"><input type="radio" name="shortcut-mode" value="custom"> My shortcuts <span>Choose your sites and their order.</span></label>
+      </fieldset>
+      <p class="settings-hint">Chrome shares most-visited sites, but not manually customized New Tab shortcuts. Add those here once.</p>
+      <section id="shortcut-editor" aria-label="Edit shortcuts" hidden>
+        <div class="editor-toolbar"><span>Up to 20 shortcuts</span><button id="copy-top-sites" class="text-button" type="button">Copy most visited</button></div>
+        <div id="shortcut-rows"></div>
+        <button id="add-shortcut" class="secondary-button" type="button">＋ Add shortcut</button>
+      </section>
+      <p id="settings-error" class="error" role="alert"></p>
+      <div class="dialog-actions"><button id="cancel-settings" class="secondary-button" type="button">Cancel</button><button class="primary-button" type="submit">Save changes</button></div>
+    </form>
+  </dialog>
+</body>
+</html>

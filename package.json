@@ -1,0 +1,13 @@
+{
+  "name": "apod-new-tab",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "An open-source Chrome new-tab extension with APOD and familiar site shortcuts.",
+  "scripts": {
+    "test": "node --test tests/model.test.js",
+    "test:browser": "node tests/browser.cjs",
+    "package": "python3 scripts/package.py"
+  },
+  "devDependencies": { "playwright": "1.62.1" }
+}
