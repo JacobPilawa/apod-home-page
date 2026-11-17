@@ -6,7 +6,9 @@ It shows the daily image above your shortcuts. Click the image title to show or 
 
 Sunrise, sunset, moonrise, moonset, and moon phase appear in a small row above the image. Location and time zone are detected automatically. You can override coordinates in **Customize**.
 
-![APOD Home Page showing Saturn, local sun and moon times, and site shortcuts](docs/example.png)
+A compact weather row shows current conditions, humidity, and the next 24 hours of temperature and precipitation chance together. Click **°F** or **°C** to switch units. Weather stays current when you browse older APODs. The image adjusts to leave room for your shortcuts.
+
+![APOD Home Page with local weather, sun and moon times, and site shortcuts](docs/example.png)
 
 Example homepage.
 
@@ -23,9 +25,11 @@ No build step or dependency installation is needed.
 
 ## Notes
 
-- If the rise/set times show dashes, allow **Location** in Chrome’s address-bar permissions, then open a fresh tab.
+- If weather is missing or the rise/set times show dashes, allow **Location** in Chrome’s address-bar permissions, then open a fresh tab.
 - **Customize** lets you edit shortcuts and change the appearance. Chrome supplies most-visited sites automatically; manually customized shortcuts need adding once.
 - To hide Chrome's bottom banner, right-click it and choose **Hide footer on New Tab page**.
 - No API key or account is needed. Settings stay in your browser. See [Privacy](PRIVACY.md).
 
 The code is [MIT licensed](LICENSE). The gray New Tab icons are from [Chromium](extension/icons/LICENSE); astronomy calculations use bundled [SunCalc](extension/vendor/suncalc/LICENSE). APOD images and text retain their original credits and rights.
+
+Weather data from [Open-Meteo](https://open-meteo.com/) ([CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)), displayed as a combined chart with temperatures rounded or converted as needed. Its free API is for noncommercial use.

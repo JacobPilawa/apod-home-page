@@ -1,6 +1,7 @@
 import { fetchPicture } from './lib/apod.js';
 import { DEFAULT_SETTINGS, MAX_SHORTCUTS, FIRST_APOD_DAY, dayKey, pictureDay, offsetDay, formatPictureDay, readSettings, shouldRefresh, validateShortcuts } from './lib/model.js';
 import { prepareLocationSettings, readLocationInputs } from './sky.js';
+import './weather.js';
 
 const $ = id => document.getElementById(id);
 let settings = { ...DEFAULT_SETTINGS };
@@ -286,3 +287,24 @@ init().catch(error => {
   $('status').textContent = 'See the README for installation instructions.';
   document.querySelector('.apod').setAttribute('aria-busy', 'false');
 });
+
+// Reserve space for the actual shortcut rows and header, including wrapped titles.
+// Explicitly expanded APOD details can scroll without shrinking the picture again.
+function fitPicture() {
+  const main = document.querySelector('main').getBoundingClientRect();
+  const media = $('media').getBoundingClientRect();
+  const details = $('picture-details');
+  const expandedHeight = details.hidden ? 0 : details.getBoundingClientRect().height + 14;
+  const available = innerHeight - (media.top + scrollY) - (main.bottom - media.bottom - expandedHeight) - 20;
+  const height = `${Math.floor(Math.max(140, Math.min(630, innerHeight * .585, available)))}px`;
+  if ($('media').style.getPropertyValue('--media-height') !== height) $('media').style.setProperty('--media-height', height);
+}
+let fitting = false;
+function scheduleFit() {
+  if (fitting) return;
+  fitting = true;
+  requestAnimationFrame(() => { fitting = false; fitPicture(); });
+}
+new ResizeObserver(scheduleFit).observe(document.querySelector('main'));
+window.addEventListener('resize', scheduleFit);
+scheduleFit();

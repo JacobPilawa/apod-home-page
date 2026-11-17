@@ -19,6 +19,7 @@ const nasaPage = `<html><body><img src="https://example.com/unrelated-logo.png">
 const videoPage = imagePage.replace('<a href="image/full.jpg"><img src="image/small.jpg" alt="A field of stars"></a>', '<iframe src="https://www.youtube.com/embed/test"></iframe>').replace('</body>', '<img src="https://example.com/footer-logo.png"></body>');
 
 async function run() {
+  const { weatherFixture } = await import('./fixtures/weather.js');
   const profile = await fs.mkdtemp(path.join(os.tmpdir(), 'apod-extension-test-'));
   let context;
   try {
@@ -29,6 +30,8 @@ async function run() {
     });
     let mode = 'image';
     let requests = 0;
+    let weatherMode = 'ok';
+    const weatherRequests = [];
     await context.addInitScript(() => {
       const RealDate = Date;
       window.Date = class extends RealDate {
@@ -43,6 +46,11 @@ async function run() {
     const pixel = await fs.readFile(path.join(extension, 'icons/new-tab32.png'));
     await context.route('https://**/*', async route => {
       const url = route.request().url();
+      if (url.startsWith('https://api.open-meteo.com/v1/forecast?')) {
+        weatherRequests.push(url);
+        if (weatherMode === 'offline') return route.abort('internetdisconnected');
+        return route.fulfill({ contentType: 'application/json', body: JSON.stringify(weatherMode === 'corrupt' ? { error: true } : weatherFixture()) });
+      }
       if (url === 'https://apod.com/en/ap261007.html' || url.startsWith('https://science.nasa.gov/wp-json/wp/v2/image-article') || url === 'https://science.nasa.gov/image-article/apod-2026-october-7-test-archive/') {
         requests++;
         if (mode === 'offline') return route.abort('internetdisconnected');
@@ -75,9 +83,23 @@ async function run() {
     assert.equal(await page.locator('.sky-fact').count(), 5);
     const automaticLocation = await page.evaluate(async () => (await chrome.storage.local.get('observerLocation')).observerLocation);
     assert.deepEqual([automaticLocation.latitude, automaticLocation.longitude, automaticLocation.automatic], [37.77, -122.42, true]);
+    await page.waitForFunction(() => document.getElementById('weather-temperature').textContent === '68');
+    assert.equal(await page.locator('#weather-humidity').textContent(), '74%');
+    assert.equal(await page.locator('#weather-condition').textContent(), 'Partly cloudy');
+    assert.equal(await page.locator('#weather-rain').textContent(), '30%');
+    assert.equal(await page.locator('#weather-chart .forecast-line').count(), 2, 'temperature and precipitation share one chart');
+    const weatherUrl = new URL(weatherRequests[0]);
+    assert.equal(weatherUrl.searchParams.get('latitude'), '37.77');
+    assert.equal(weatherUrl.searchParams.get('longitude'), '-122.42');
+    const beforeUnits = weatherRequests.length;
+    await page.locator('#weather-celsius').click();
+    assert.equal(await page.locator('#weather-temperature').textContent(), '20');
+    assert.equal(await page.locator('#weather-celsius').getAttribute('aria-pressed'), 'true');
+    assert.equal(weatherRequests.length, beforeUnits, 'unit changes need no new forecast request');
     // Location failure keeps phase available, and manual coordinates are a fallback.
     await page.evaluate(async () => { window.blockLocation = true; await chrome.storage.local.remove('observerLocation'); });
     await page.waitForFunction(() => document.getElementById('sunrise-time').textContent === '—');
+    await page.waitForFunction(() => document.getElementById('weather-status').textContent.includes('Allow Location'));
     assert.equal(await page.locator('#moon-phase').textContent(), 'Waning crescent');
     await page.locator('#settings-button').click();
     await page.locator('#sky-latitude').fill('37.77');
@@ -116,6 +138,7 @@ async function run() {
     // daily cache separate so new tabs always return to the latest picture.
     await page.locator('#previous-day').click();
     await page.waitForFunction(() => document.getElementById('picture-title').textContent === 'Yesterday’s Test Galaxy');
+    assert.match(await page.locator('#weather-updated').textContent(), /^Now · /, 'weather stays current on archive APODs');
     assert.match(await page.locator('#sunrise-time').getAttribute('title'), /10\/7\/2026/);
     assert.equal(await page.locator('#picture-details').isVisible(), false, 'a newly selected picture starts with its details hidden');
     assert.equal(await page.locator('#picture-date').textContent(), 'October 7, 2026');
@@ -133,6 +156,8 @@ async function run() {
     await page.reload();
     await page.waitForFunction(() => document.getElementById('picture-date').textContent === 'October 8, 2026');
     assert.equal(await page.locator('#picture-details').isVisible(), false, 'fresh tabs start with details hidden');
+    await page.waitForFunction(() => document.getElementById('weather-temperature').textContent === '20');
+    assert.equal(await page.locator('#weather-celsius').getAttribute('aria-pressed'), 'true', 'units survive new tabs');
 
     // Customize, reject executable URLs, save, reorder, and persist across tabs.
     await page.locator('#settings-button').click();
@@ -207,17 +232,60 @@ async function run() {
     await page.waitForFunction(() => document.querySelectorAll('a.shortcut').length === 10);
     const y = await page.locator('a.shortcut').evaluateAll(nodes => nodes.map(el => el.getBoundingClientRect().y));
     assert.ok(y.every(value => value === y[0]), 'ten site icons fit in a single desktop row');
-    for (const height of [800, 600]) {
-      await page.setViewportSize({ width: 1440, height });
+    for (const [width, height] of [[1920, 1080], [1440, 900], [1366, 768], [1280, 720], [1440, 600], [1024, 600], [900, 700]]) {
+      await page.setViewportSize({ width, height });
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
       assert.equal(await page.locator('a.shortcut').evaluateAll(nodes => nodes.every(el => el.getBoundingClientRect().bottom <= innerHeight)), true, 'shortcuts stay visible on shorter desktop windows with details closed');
+      assert.equal(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight), true, `no page scrolling at ${width}×${height}`);
       const strip = await page.locator('.sky-strip').boundingBox();
       assert.ok(strip.height < 30, 'sun and moon info stays in one thin row');
+      assert.ok((await page.locator('#weather').boundingBox()).height <= 102, 'weather is one compact row');
     }
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.locator('#picture-title').evaluate(el => { el.textContent = 'A Closer Look at the Stars, Nebulae, Galaxies, and Distant Worlds Beyond Our Solar System'.repeat(2); });
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    assert.equal(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight), true, 'a wrapped APOD title also leaves the shortcuts visible');
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.evaluate(async () => chrome.storage.local.set({ settings: { theme: 'light', shortcutMode: 'custom', shortcuts: Array.from({ length: 20 }, (_, i) => ({ title: `Site ${i + 1}`, url: `https://example.com/${i}` })) } }));
+    await page.waitForFunction(() => document.querySelectorAll('a.shortcut').length === 20);
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    assert.equal(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight), true, 'two full shortcut rows fit on a normal desktop');
+    await page.evaluate(async () => chrome.storage.local.set({ settings: { theme: 'light', shortcutMode: 'custom', shortcuts: Array.from({ length: 10 }, (_, i) => ({ title: `Site ${i + 1}`, url: `https://example.com/${i}` })) } }));
+    await page.waitForFunction(() => document.querySelectorAll('a.shortcut').length === 10);
     await page.setViewportSize({ width: 390, height: 844 });
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
     await page.locator('#settings-button').click();
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
     await page.keyboard.press('Escape');
+
+    // Weather cache avoids a request per new tab and fails independently of APOD.
+    await page.setViewportSize({ width: 1440, height: 800 });
+    const weatherBeforeReload = weatherRequests.length;
+    await page.reload();
+    await page.waitForFunction(() => !document.getElementById('weather-content').hidden);
+    assert.equal(weatherRequests.length, weatherBeforeReload, 'fresh weather cache survives new tabs');
+    weatherMode = 'offline';
+    await page.evaluate(async () => {
+      const saved = await chrome.storage.local.get('weatherCache');
+      saved.weatherCache.fetchedAt -= 16 * 60000;
+      await chrome.storage.local.set(saved);
+    });
+    await page.reload();
+    await page.waitForFunction(() => document.getElementById('weather-updated').textContent.startsWith('Saved'));
+    assert.equal(await page.locator('#weather-temperature').textContent(), '20');
+    await page.evaluate(async () => chrome.storage.local.set({ observerLocation: { latitude: 0, longitude: 0 } }));
+    await page.waitForFunction(() => document.getElementById('weather-status').textContent.includes('Weather unavailable'));
+    assert.equal(await page.locator('#weather-content').isVisible(), false, 'no saved weather from a different location');
+    weatherMode = 'corrupt';
+    await page.reload();
+    await page.waitForFunction(() => document.getElementById('weather-status').textContent.includes('Weather unavailable'));
+    assert.equal(await page.locator('a.shortcut').count(), 10, 'bad weather responses do not affect shortcuts');
+    weatherMode = 'ok';
+    await page.evaluate(() => window.dispatchEvent(new Event('online')));
+    await page.waitForFunction(() => !document.getElementById('weather-content').hidden);
+    const recoveredWeather = new URL(weatherRequests.at(-1));
+    assert.equal(recoveredWeather.searchParams.get('latitude'), '0.00');
+    assert.equal(recoveredWeather.searchParams.get('longitude'), '0.00');
 
     // Cold-start outage still presents shortcuts and a useful recovery state.
     mode = 'offline';
@@ -226,7 +294,7 @@ async function run() {
     await page.waitForFunction(() => document.getElementById('status').textContent.includes('independently'));
     assert.equal(await page.locator('a.shortcut').count(), 10);
     assert.deepEqual(errors, [], 'no uncaught page errors');
-    console.log('Browser checks passed: real extension override, parsing, safe rendering, fallback, cache, offline recovery, videos, shortcuts, persistence, responsive layout.');
+    console.log('Browser checks passed: real extension override, APOD and weather, combined chart, units, location, cache, offline recovery, safe rendering, shortcuts, persistence, responsive layout without scrolling.');
   } finally {
     if (context) await context.close();
     await fs.rm(profile, { recursive: true, force: true });

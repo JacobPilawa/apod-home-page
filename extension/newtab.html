@@ -26,6 +26,21 @@
         <div class="sky-fact moonset-fact"><dt>Moonset</dt><dd id="moonset-time">—</dd></div>
         <div class="sky-fact phase-fact"><dt class="sr-only">Moon phase and illumination</dt><dd><span id="moon-phase">—</span> <span id="moon-illumination"></span></dd></div>
       </dl>
+      <section id="weather" class="weather-strip" aria-label="Local weather now and the next 24 hours" aria-busy="true">
+        <p id="weather-status" class="weather-status" role="status">Detecting local weather…</p>
+        <div id="weather-content" class="weather-content" hidden>
+          <div class="weather-now">
+            <div class="weather-temperature"><span id="weather-temperature">—</span><div class="weather-units" aria-label="Temperature unit"><button id="weather-fahrenheit" type="button" aria-pressed="true">°F</button><button id="weather-celsius" type="button" aria-pressed="false">°C</button></div></div>
+            <span id="weather-condition" class="weather-condition"></span>
+            <span id="weather-updated" class="weather-updated">Now · Local weather</span>
+          </div>
+          <div class="weather-forecast">
+            <div class="weather-chart-heading"><span class="weather-legend"><span class="temperature-key">Temperature</span><span class="rain-key">Precip chance</span></span><span>Next 24h</span></div>
+            <div id="weather-chart" class="weather-chart"></div>
+          </div>
+          <div class="weather-summary"><dl><div><dt>Precip</dt><dd id="weather-rain">—</dd></div><div><dt>Humidity</dt><dd id="weather-humidity">—</dd></div></dl><a href="https://open-meteo.com/" class="weather-source" title="Weather data by Open-Meteo, CC BY 4.0">Open-Meteo ↗</a></div>
+        </div>
+      </section>
       <div id="media" class="media"><div class="media-message">Loading APOD…</div></div>
       <h1><button id="details-toggle" class="title-toggle" type="button" aria-expanded="false" aria-controls="picture-details" disabled>
         <span id="picture-title">Loading…</span>
@@ -49,7 +64,7 @@
     <form id="settings-form">
       <div class="dialog-heading"><h2 id="settings-title">Customize</h2><button id="close-settings" class="quiet-button" type="button" aria-label="Close customization">✕</button></div>
       <label class="theme-label" for="theme">Appearance<select id="theme"><option value="light">Light</option><option value="dark">Dark</option><option value="system">Match device</option></select></label>
-      <fieldset class="sky-location-settings"><legend>Local sun and moon</legend>
+      <fieldset class="sky-location-settings"><legend>Local weather, sun and moon</legend>
         <p class="settings-hint">Location and time zone are automatic. Enter coordinates here to override the location.</p>
         <div class="location-fields">
           <label>Latitude<input id="sky-latitude" type="number" min="-90" max="90" step="any" placeholder="e.g. 37.77"></label>

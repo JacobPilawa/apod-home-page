@@ -1,14 +1,14 @@
 {
   "manifest_version": 3,
   "name": "APOD Home Page",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "The daily Astronomy Picture of the Day with site shortcuts on Chrome's New Tab page.",
   "minimum_chrome_version": "109",
   "chrome_url_overrides": { "newtab": "newtab.html" },
   "permissions": ["storage", "topSites", "favicon", "geolocation"],
-  "host_permissions": ["https://apod.com/*", "https://science.nasa.gov/*"],
+  "host_permissions": ["https://apod.com/*", "https://science.nasa.gov/*", "https://api.open-meteo.com/*"],
   "icons": { "16": "icons/new-tab16.png", "32": "icons/new-tab32.png" },
   "content_security_policy": {
-    "extension_pages": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' https:; connect-src 'self' https://apod.com https://science.nasa.gov; object-src 'none'; base-uri 'none'; frame-src 'none'"
+    "extension_pages": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' https:; connect-src 'self' https://apod.com https://science.nasa.gov https://api.open-meteo.com; object-src 'none'; base-uri 'none'; frame-src 'none'"
   }
 }

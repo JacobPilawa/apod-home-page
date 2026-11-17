@@ -10,4 +10,6 @@ Preferences, custom shortcuts, and the most recently successful APOD's text, dat
 
 Sun and moon times are calculated locally. Chrome handles automatic location detection; the extension caches rounded coordinates locally for five minutes. You can enter coordinates instead in Customize. Coordinates are not sent to APOD or an astronomy service.
 
+Weather requests send coordinates rounded to two decimal places to `api.open-meteo.com`, which also receives normal network information such as your IP address. Requests omit credentials and the referrer. The response supplies the location's time zone; no city search or additional location service is used. The forecast is cached locally for 15 minutes to avoid a request for every new tab. If an update fails, saved forecasts up to six hours old can appear with a “Saved” label. The selected temperature unit stays in local storage. See [Open-Meteo’s privacy policy](https://open-meteo.com/en/terms).
+
 The extension has no permission to read your full browsing history, arbitrary tabs, page content on sites you visit, or cookies. It does not inject content scripts into websites. External HTML is parsed in a detached document, and extracted captions and shortcut names are rendered as text.

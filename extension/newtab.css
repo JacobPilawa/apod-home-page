@@ -2,7 +2,7 @@
 :root[data-theme="dark"] { color-scheme: dark; --bg: #14171d; --fg: #e7eaf0; --muted: #a0a9b8; --soft: #252c39; --border: #343c4b; --accent: #a9c7fb; --hover: #1c222d; --dialog: #1c222d; }
 @media (prefers-color-scheme: dark) { :root[data-theme="system"] { color-scheme: dark; --bg: #14171d; --fg: #e7eaf0; --muted: #a0a9b8; --soft: #252c39; --border: #343c4b; --accent: #a9c7fb; --hover: #1c222d; --dialog: #1c222d; } }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; min-height: 100vh; }
+body { display: flow-root; margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; min-height: 100vh; }
 a { color: inherit; text-decoration: none; }
 button, input, select { font: inherit; }
 button { cursor: pointer; }
@@ -13,20 +13,20 @@ button:disabled { cursor: default; opacity: .45; }
 .quiet-button:hover { background: var(--soft); color: var(--fg); }
 .text-button { padding: 0; color: var(--accent); }
 .text-button:hover, .picture-actions a:hover { text-decoration: underline; }
-main { max-width: 1200px; margin: 28px auto 0; padding: 0 28px; }
+main { display: flow-root; max-width: 1200px; margin: 18px auto 0; padding: 0 28px; }
 .apod { width: min(100%, 1170px); margin: 0 auto; text-align: center; }
-.date-navigation { display: grid; grid-template-columns: 32px 180px 32px; justify-content: center; align-items: center; gap: 12px; margin-bottom: 16px; color: var(--muted); font-size: 13px; }
+.date-navigation { display: grid; grid-template-columns: 32px 180px 32px; justify-content: center; align-items: center; gap: 12px; margin-bottom: 8px; color: var(--muted); font-size: 13px; }
 #picture-date { color: #000; font-size: 15px; }
 :root[data-theme="dark"] #picture-date { color: var(--fg); }
 @media (prefers-color-scheme: dark) { :root[data-theme="system"] #picture-date { color: var(--fg); } }
 .date-arrow { display: flex; justify-content: center; align-items: center; height: 32px; border: 0; border-radius: 50%; color: var(--accent); background: transparent; font-size: 26px; line-height: 1; }
 .date-arrow:hover:enabled { background: var(--soft); }
 .return-today { display: block; margin: -8px auto 12px; font-size: 11px; }
-.media { height: clamp(180px, min(58.5vh, calc(100dvh - 340px)), 630px); display: flex; align-items: center; justify-content: center; border-radius: 12px; overflow: hidden; }
+.media { height: var(--media-height, clamp(140px, min(58.5vh, calc(100dvh - 440px)), 630px)); display: flex; align-items: center; justify-content: center; border-radius: 12px; overflow: hidden; }
 .media img { display: block; width: 100%; height: 100%; object-fit: contain; border-radius: 10px; }
 .media-message { background: var(--hover); width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; gap: 12px; color: var(--muted); border-radius: 12px; }
 .media-message a { color: var(--accent); }
-h1 { margin: 16px 0 0; font-size: 24px; line-height: 1.3; font-weight: 550; letter-spacing: -.6px; }
+h1 { margin: 12px 0 0; font-size: 24px; line-height: 1.3; font-weight: 550; letter-spacing: -.6px; }
 .title-toggle { border: 0; padding: 0; background: transparent; color: var(--fg); font: inherit; letter-spacing: inherit; }
 .title-toggle:hover:enabled #picture-title { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
 .details-hint { display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 5px; color: var(--muted); font-size: 11px; line-height: 1.6; font-weight: 400; letter-spacing: 0; }
@@ -36,7 +36,7 @@ h1 { margin: 16px 0 0; font-size: 24px; line-height: 1.3; font-weight: 550; lett
 .picture-actions { display: flex; justify-content: center; align-items: center; gap: 22px; font-size: 11px; margin-top: 12px; color: var(--accent); }
 .status { margin: 8px 0 0; color: var(--muted); font-size: 11px; min-height: 18px; }
 .status:empty { display: none; }
-.shortcuts { margin: 24px auto 36px; }
+.shortcuts { margin: 16px auto 12px; }
 .shortcuts-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
 .shortcut { flex: 0 0 calc((100% - 72px) / 10); border-radius: 12px; padding: 16px 6px 12px; text-align: center; min-width: 0; }
 .shortcut:hover { background: var(--hover); }
@@ -68,7 +68,7 @@ legend { padding: 0; margin-bottom: 10px; font-weight: 600; }
 .primary-button { background: var(--accent); color: var(--bg); border-color: var(--accent); }
 .dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
 .error { color: #cf5050; font-size: 12px; }
-.sky-strip { display: flex; width: max-content; max-width: 100%; gap: 6px; margin: 0 auto 12px; overflow-x: auto; scrollbar-width: none; }
+.sky-strip { display: flex; width: max-content; max-width: 100%; gap: 6px; margin: 0 auto 8px; overflow-x: auto; scrollbar-width: none; }
 .sky-strip::-webkit-scrollbar { display: none; }
 .sky-fact { position: relative; display: flex; align-items: baseline; flex: 0 0 auto; gap: 6px; padding: 5px 9px; border-radius: 6px; background: var(--sky-bg); white-space: nowrap; }
 .sky-fact dt { color: var(--muted); font-size: 10px; line-height: 1.5; }
@@ -87,4 +87,39 @@ legend { padding: 0; margin-bottom: 10px; font-weight: 600; }
 :root[data-theme="dark"] .sky-strip { --sunrise-bg: #2d271e; --sunset-bg: #302321; --moonrise-bg: #202634; --moonset-bg: #292333; --phase-bg: #1e2c29; }
 @media (prefers-color-scheme: dark) { :root[data-theme="system"] .sky-strip { --sunrise-bg: #2d271e; --sunset-bg: #302321; --moonrise-bg: #202634; --moonset-bg: #292333; --phase-bg: #1e2c29; } }
 @media (max-width: 1000px) { .shortcuts-grid { max-width: 600px; margin: auto; } .shortcut { flex-basis: calc((100% - 32px) / 5); } }
-@media (max-width: 600px) { main { padding: 0 20px 64px; margin-top: 20px; } .media { height: 45vh; min-height: 270px; } h1 { font-size: 21px; } .shortcut { flex-basis: calc((100% - 24px) / 4); } .shortcuts { margin-top: 24px; } dialog { padding: 20px; } .shortcut-row { grid-template-columns: 1fr auto; } .shortcut-row input:nth-child(2) { grid-column: 1; grid-row: 2; } .row-controls { grid-column: 2; grid-row: 1 / 3; } }
+@media (max-width: 600px) { main { padding: 0 20px 42px; margin-top: 12px; } h1 { font-size: 21px; } .shortcut { flex-basis: calc((100% - 24px) / 4); } dialog { padding: 20px; } .shortcut-row { grid-template-columns: 1fr auto; } .shortcut-row input:nth-child(2) { grid-column: 1; grid-row: 2; } .row-controls { grid-column: 2; grid-row: 1 / 3; } }
+
+.weather-strip { --weather-temp: #bd7a15; --weather-rain: #4e84c5; width: min(100%, 820px); margin: 0 auto 12px; min-height: 100px; text-align: left; border: 1px solid var(--border); border-radius: 12px; background: var(--hover); }
+.weather-status { display: flex; align-items: center; justify-content: center; min-height: 98px; margin: 0; padding: 8px 16px; font-size: 12px; color: var(--muted); }
+.weather-content { display: grid; grid-template-columns: 112px minmax(0, 1fr) 100px; align-items: center; gap: 18px; padding: 9px 16px; }
+.weather-now { min-width: 0; }
+.weather-temperature { display: flex; align-items: center; gap: 7px; line-height: 1.1; }
+#weather-temperature { font-size: 32px; font-weight: 500; letter-spacing: -1px; }
+.weather-units { display: flex; align-self: flex-start; gap: 3px; margin-top: 3px; }
+.weather-units button { padding: 2px 1px; border: 0; background: transparent; color: var(--muted); font-size: 11px; }
+.weather-units button[aria-pressed="true"] { color: var(--fg); text-decoration: underline; text-underline-offset: 3px; }
+.weather-condition { display: block; margin-top: 3px; font-size: 12px; line-height: 1.3; }
+.weather-updated { display: block; margin-top: 3px; font-size: 9px; color: var(--muted); }
+.weather-chart-heading { display: flex; justify-content: space-between; gap: 8px; color: var(--muted); font-size: 9px; line-height: 1.4; }
+.weather-legend { display: flex; gap: 12px; }
+.weather-legend span::before { content: ''; display: inline-block; width: 9px; height: 2px; margin: 0 4px 3px 0; background: currentColor; }
+.temperature-key { color: var(--weather-temp); }
+.rain-key { color: var(--weather-rain); }
+.weather-chart svg { display: block; width: 100%; height: 64px; overflow: visible; }
+.weather-chart text { fill: var(--muted); font: 10px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+.weather-chart .temperature-axis { fill: var(--weather-temp); }
+.weather-chart .rain-axis { fill: var(--weather-rain); }
+.weather-chart .chart-grid { stroke: var(--border); stroke-dasharray: 2 4; }
+.weather-chart .temperature-line { stroke: var(--weather-temp); }
+.weather-chart .rain-line { stroke: var(--weather-rain); stroke-dasharray: 4 3; }
+.weather-chart .forecast-line { fill: none; stroke-width: 1.8; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.weather-summary dl { margin: 0 0 5px; font-size: 11px; }
+.weather-summary dl div { display: flex; justify-content: space-between; gap: 8px; }
+.weather-summary dt { color: var(--muted); }
+.weather-summary dd { margin: 0; font-weight: 500; }
+.weather-source { display: block; color: var(--muted); font-size: 9px; text-align: right; }
+.weather-source:hover { text-decoration: underline; }
+:root[data-theme="dark"] .weather-strip { --weather-temp: #efb653; --weather-rain: #87b6ed; }
+@media (prefers-color-scheme: dark) { :root[data-theme="system"] .weather-strip { --weather-temp: #efb653; --weather-rain: #87b6ed; } }
+@media (max-width: 720px) { .weather-content { grid-template-columns: 82px minmax(0, 1fr) 82px; gap: 10px; padding: 9px 10px; } #weather-temperature { font-size: 28px; } .weather-chart-heading { font-size: 8px; } .weather-legend { gap: 6px; } }
+@media (max-width: 480px) { .weather-content { grid-template-columns: 68px minmax(0, 1fr); gap: 8px; } .weather-summary { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; } .weather-summary dl { display: flex; gap: 14px; margin: 0; font-size: 10px; } .weather-source { font-size: 8px; } .weather-chart-heading > span:last-child { display: none; } .weather-chart svg { height: 68px; } #weather-temperature { font-size: 26px; } .weather-temperature { gap: 3px; } .weather-units { gap: 1px; } .weather-condition { font-size: 11px; } }
