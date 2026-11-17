@@ -153,6 +153,9 @@ async function init() {
     chrome.storage.local.set({ weatherUnit: value }).catch(() => {});
   });
   new ResizeObserver(() => { if (data && !$('weather-content').hidden) render(); }).observe($('weather-chart'));
+  new ResizeObserver(([entry]) => {
+    $('weather').style.width = `${entry.contentRect.width}px`;
+  }).observe(document.querySelector('.sky-strip'));
   document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
   window.addEventListener('online', () => { retryAt = 0; refresh(); });
   setInterval(() => { if (!document.hidden) refresh(); }, 60000);

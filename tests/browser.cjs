@@ -239,7 +239,9 @@ async function run() {
       assert.equal(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight), true, `no page scrolling at ${width}×${height}`);
       const strip = await page.locator('.sky-strip').boundingBox();
       assert.ok(strip.height < 30, 'sun and moon info stays in one thin row');
-      assert.ok((await page.locator('#weather').boundingBox()).height <= 102, 'weather is one compact row');
+      const weather = await page.locator('#weather').boundingBox();
+      assert.ok(weather.height <= 80, 'weather is one compact row');
+      assert.ok(Math.abs(weather.width - strip.width) < 1 && Math.abs(weather.x - strip.x) < 1, 'weather aligns to the sun and moon row');
     }
     await page.setViewportSize({ width: 1280, height: 720 });
     await page.locator('#picture-title').evaluate(el => { el.textContent = 'A Closer Look at the Stars, Nebulae, Galaxies, and Distant Worlds Beyond Our Solar System'.repeat(2); });
