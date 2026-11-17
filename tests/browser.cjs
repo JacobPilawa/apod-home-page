@@ -88,6 +88,12 @@ async function run() {
     assert.equal(await page.locator('#weather-condition').textContent(), 'Partly cloudy');
     assert.equal(await page.locator('#weather-rain').textContent(), '30%');
     assert.equal(await page.locator('#weather-chart .forecast-line').count(), 2, 'temperature and precipitation share one chart');
+    assert.ok(await page.locator('#weather-chart .temperature-value').count() >= 5, 'temperatures are labeled at regular intervals');
+    assert.ok(await page.locator('#weather-chart .day-boundary').count() >= 1, 'midnight is marked');
+    assert.match(await page.locator('#weather-chart .day-label').first().textContent(), /Fri.*12AM/);
+    assert.equal(await page.locator('.weather-now #weather-rain').count(), 1, 'precipitation is under current conditions');
+    assert.equal(await page.locator('.weather-now #weather-humidity').count(), 1, 'humidity is under current conditions');
+    assert.equal(await page.locator('#weather-updated, #weather .weather-source, #weather a').count(), 0, 'the row has no timestamp or source link');
     const weatherUrl = new URL(weatherRequests[0]);
     assert.equal(weatherUrl.searchParams.get('latitude'), '37.77');
     assert.equal(weatherUrl.searchParams.get('longitude'), '-122.42');
@@ -138,7 +144,7 @@ async function run() {
     // daily cache separate so new tabs always return to the latest picture.
     await page.locator('#previous-day').click();
     await page.waitForFunction(() => document.getElementById('picture-title').textContent === 'Yesterday’s Test Galaxy');
-    assert.match(await page.locator('#weather-updated').textContent(), /^Now · /, 'weather stays current on archive APODs');
+    assert.equal(await page.locator('#weather-saved').isVisible(), false, 'weather stays current on archive APODs');
     assert.match(await page.locator('#sunrise-time').getAttribute('title'), /10\/7\/2026/);
     assert.equal(await page.locator('#picture-details').isVisible(), false, 'a newly selected picture starts with its details hidden');
     assert.equal(await page.locator('#picture-date').textContent(), 'October 7, 2026');
@@ -273,7 +279,7 @@ async function run() {
       await chrome.storage.local.set(saved);
     });
     await page.reload();
-    await page.waitForFunction(() => document.getElementById('weather-updated').textContent.startsWith('Saved'));
+    await page.waitForFunction(() => !document.getElementById('weather-saved').hidden);
     assert.equal(await page.locator('#weather-temperature').textContent(), '20');
     await page.evaluate(async () => chrome.storage.local.set({ observerLocation: { latitude: 0, longitude: 0 } }));
     await page.waitForFunction(() => document.getElementById('weather-status').textContent.includes('Weather unavailable'));

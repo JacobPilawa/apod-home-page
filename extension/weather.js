@@ -21,12 +21,16 @@ function svgNode(tag, attributes = {}, text) {
 function renderChart(forecast) {
   const width = Math.max(100, $('weather-chart').clientWidth);
   const height = 64;
-  const left = 29, right = width - 30, top = 9, bottom = 46;
+  const left = 29, right = width - 38, top = 18, bottom = 45;
   const { hours, min, max } = forecast;
   const x = i => left + i / (hours.length - 1) * (right - left);
   const yTemperature = value => bottom - (value - min) / (max - min) * (bottom - top);
   const yRain = value => bottom - value / 100 * (bottom - top);
   const time = new Intl.DateTimeFormat(undefined, { hour: 'numeric', timeZone: data.timeZone });
+  const day = new Intl.DateTimeFormat('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: data.timeZone });
+  const weekday = new Intl.DateTimeFormat(undefined, { weekday: 'short', timeZone: data.timeZone });
+  const clock = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: data.timeZone });
+  const boundaries = hours.flatMap((hour, i) => (i ? day.format(hour.time) !== day.format(hours[i - 1].time) : clock.format(hour.time) === '00:00') ? [i] : []);
   const fullTime = new Intl.DateTimeFormat(undefined, { weekday: 'short', hour: 'numeric', minute: '2-digit', timeZone: data.timeZone, timeZoneName: 'short' });
   const pointLabel = hour => `${fullTime.format(hour.time)}: ${hour.temperature === null ? 'temperature unavailable' : `${Math.round(hour.temperature)}°${unit}`}, ${hour.rain === null ? 'precipitation chance unavailable' : `${hour.rain}% precipitation chance`}`;
   const svg = svgNode('svg', { viewBox: `0 0 ${width} ${height}`, role: 'img', 'aria-labelledby': 'weather-chart-title weather-chart-description' });
@@ -35,6 +39,11 @@ function renderChart(forecast) {
   for (const y of [top, bottom]) svg.append(svgNode('line', { x1: left, x2: right, y1: y, y2: y, class: 'chart-grid' }));
   for (const [value, y] of [[max, top], [min, bottom]]) svg.append(svgNode('text', { x: 0, y: y + 3, class: 'temperature-axis' }, `${value}°`));
   for (const [value, y] of [[100, top], [0, bottom]]) svg.append(svgNode('text', { x: width, y: y + 3, 'text-anchor': 'end', class: 'rain-axis' }, `${value}%`));
+  for (const i of boundaries) {
+    const marker = svgNode('line', { x1: x(i), x2: x(i), y1: 8, y2: bottom + 3, class: 'day-boundary' });
+    marker.append(svgNode('title', {}, `${weekday.format(hours[i].time)} · Midnight`));
+    svg.append(marker);
+  }
   // Missing observations break the line rather than silently becoming zero.
   for (const [field, y, className] of [['rain', yRain, 'rain-line'], ['temperature', yTemperature, 'temperature-line']]) {
     let path = '', connected = false;
@@ -47,7 +56,12 @@ function renderChart(forecast) {
   }
   const step = width >= 440 ? 3 : width >= 230 ? 6 : 12;
   hours.forEach((hour, i) => {
-    if (i % step === 0) svg.append(svgNode('text', { x: x(i), y: 62, 'text-anchor': 'middle' }, time.format(hour.time).replace(/\s/g, '')));
+    const boundary = boundaries.includes(i);
+    if (boundary || (i % step === 0 && boundaries.every(b => Math.abs(x(i) - x(b)) > 46))) {
+      const label = time.format(hour.time).replace(/\s/g, '');
+      svg.append(svgNode('text', { x: x(i), y: 62, 'text-anchor': 'middle', class: boundary ? 'day-label' : 'time-label' }, boundary ? `${weekday.format(hour.time)} ${label}` : label));
+    }
+    if (i % step === 0 && hour.temperature !== null) svg.append(svgNode('text', { x: x(i), y: yTemperature(hour.temperature) - 6, 'text-anchor': i === 0 ? 'start' : i === hours.length - 1 ? 'end' : 'middle', class: 'temperature-value' }, `${Math.round(hour.temperature)}°`));
     const hit = svgNode('rect', { x: x(i) - (right - left) / (hours.length - 1) / 2, y: 0, width: (right - left) / (hours.length - 1), height: 50, fill: 'transparent' });
     hit.append(svgNode('title', {}, pointLabel(hour)));
     svg.append(hit);
@@ -73,8 +87,9 @@ function render() {
   $('weather-temperature').textContent = Math.round(temperatureIn(data.current.temperature, unit));
   $('weather-condition').textContent = weatherCondition(data.current.code, data.current.isDay);
   const updated = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit', timeZone: data.timeZone }).format(data.current.time);
-  $('weather-updated').textContent = `${stale ? 'Saved' : 'Now'} · ${updated}`;
-  $('weather-updated').title = `${stale ? 'Offline or update unavailable. Last conditions' : 'Conditions updated'}: ${new Date(data.current.time).toLocaleString(undefined, { timeZone: data.timeZone, timeZoneName: 'short' })}`;
+  $('weather-saved').hidden = !stale;
+  $('weather-saved').title = `Update unavailable. Last conditions: ${updated}`;
+  $('weather-condition').title = `Conditions updated: ${new Date(data.current.time).toLocaleString(undefined, { timeZone: data.timeZone, timeZoneName: 'short' })}`;
   $('weather-rain').textContent = forecast.rain === null ? '—' : `${Math.round(forecast.rain)}%`;
   $('weather-rain').title = 'Precipitation chance in the next forecast hour (rain or snow).';
   $('weather-humidity').textContent = data.current.humidity === null ? '—' : `${Math.round(data.current.humidity)}%`;

@@ -32,13 +32,13 @@
           <div class="weather-now">
             <div class="weather-temperature"><span id="weather-temperature">—</span><div class="weather-units" aria-label="Temperature unit"><button id="weather-fahrenheit" type="button" aria-pressed="true">°F</button><button id="weather-celsius" type="button" aria-pressed="false">°C</button></div></div>
             <span id="weather-condition" class="weather-condition"></span>
-            <span id="weather-updated" class="weather-updated">Now · Local weather</span>
+            <dl class="weather-summary"><div><dt>Precip</dt><dd id="weather-rain">—</dd></div><div><dt>Humidity</dt><dd id="weather-humidity">—</dd></div></dl>
+            <span id="weather-saved" class="weather-saved" hidden>Saved forecast</span>
           </div>
           <div class="weather-forecast">
             <div class="weather-chart-heading"><span class="weather-legend"><span class="temperature-key">Temp</span><span class="rain-key">Precip</span></span><span>Next 24h</span></div>
             <div id="weather-chart" class="weather-chart"></div>
           </div>
-          <div class="weather-summary"><dl><div><dt>Precip</dt><dd id="weather-rain">—</dd></div><div><dt>Humidity</dt><dd id="weather-humidity">—</dd></div></dl><a href="https://open-meteo.com/" class="weather-source" title="Weather data by Open-Meteo, CC BY 4.0">Open-Meteo ↗</a></div>
         </div>
       </section>
       <div id="media" class="media"><div class="media-message">Loading APOD…</div></div>
@@ -72,6 +72,7 @@
         </div>
         <div class="location-actions"><button id="use-sky-location" class="secondary-button" type="button">Detect location</button><button id="clear-sky-location" class="text-button" type="button">Use automatic</button></div>
         <p id="sky-location-status" role="status"></p>
+        <p class="settings-hint">Weather data: <a class="text-button" href="https://open-meteo.com/">Open-Meteo</a> · <a class="text-button" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></p>
       </fieldset>
       <fieldset><legend>Site shortcuts</legend>
         <label class="radio-label"><input type="radio" name="shortcut-mode" value="automatic"> Most visited <span>Follow your browsing automatically.</span></label>
