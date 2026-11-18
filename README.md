@@ -8,8 +8,6 @@ Sunrise, sunset, moonrise, moonset, and moon phase appear in a small row above t
 
 A compact weather row combines temperature and precipitation forecasts. Hover for hourly values; click **°F** or **°C** to switch units. The image resizes to keep shortcuts visible.
 
-![Weather and sun/moon times](docs/weather.png)
-
 ![APOD Home Page with local weather, sun and moon times, and site shortcuts](docs/example.png)
 
 Example homepage.
