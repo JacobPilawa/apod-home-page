@@ -99,16 +99,16 @@ legend { padding: 0; margin-bottom: 10px; font-weight: 600; }
 .weather-units button { padding: 2px 1px; border: 0; background: transparent; color: var(--muted); font-size: 10px; }
 .weather-units button[aria-pressed="true"] { color: var(--fg); }
 .weather-condition { display: block; margin-top: 3px; font-size: 11px; line-height: 1.3; }
-.weather-saved { display: block; margin-top: 3px; font-size: 9px; color: var(--muted); }
 .weather-chart { position: relative; }
 .weather-chart svg { display: block; width: 100%; height: 78px; overflow: visible; cursor: crosshair; }
 .weather-chart text { fill: var(--muted); font: 10px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
 .weather-chart .temperature-axis, .weather-chart .rain-axis { fill: var(--weather-axis, #000); }
 .weather-chart .chart-grid { stroke: var(--border); stroke-dasharray: 2 4; }
-.weather-chart .current-time { stroke: var(--fg); stroke-width: 1; opacity: .5; }
+.weather-chart .current-time { stroke: #d64545; stroke-width: 1; }
 .weather-chart .day-boundary { stroke: var(--muted); opacity: .5; stroke-dasharray: 2 3; }
 .weather-chart .day-label { fill: var(--fg); font-size: 9px; font-weight: 500; }
-.weather-chart .temperature-value { font-size: 9px; paint-order: stroke; stroke: var(--bg); stroke-width: 3px; stroke-linejoin: round; }
+.weather-chart .chart-annotation { font-size: 9px; paint-order: stroke; stroke: var(--bg); stroke-width: 3px; stroke-linejoin: round; }
+.weather-chart .precipitation-value { fill: var(--accent); }
 .weather-chart .temperature-line { stroke: var(--weather-temp); }
 .weather-chart .rain-line { stroke: var(--weather-rain); stroke-dasharray: 4 3; }
 .weather-chart .forecast-line { fill: none; stroke-width: 1.4; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
@@ -117,7 +117,7 @@ legend { padding: 0; margin-bottom: 10px; font-weight: 600; }
 .weather-scrub .scrub-temperature { fill: var(--weather-temp); }
 .weather-scrub .scrub-rain { fill: var(--weather-rain); }
 .weather-readout { position: absolute; top: 0; max-width: 100%; background: var(--bg); color: var(--fg); font-size: 10px; line-height: 16px; white-space: nowrap; pointer-events: none; }
-.weather-chart[data-scrubbing] .temperature-value { visibility: hidden; }
+.weather-chart[data-scrubbing] .chart-annotation { visibility: hidden; }
 .weather-summary { margin: 4px 0 0; font-size: 10px; line-height: 1.5; }
 .weather-summary div { display: flex; justify-content: space-between; gap: 8px; }
 .weather-summary dt { color: var(--muted); }

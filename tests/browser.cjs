@@ -89,6 +89,24 @@ async function run() {
     assert.equal(await page.locator('#weather-rain').textContent(), '30%');
     assert.equal(await page.locator('#weather-chart .forecast-line').count(), 2, 'temperature and precipitation share one chart');
     assert.ok(await page.locator('#weather-chart .temperature-value').count() >= 5, 'temperatures are labeled at regular intervals');
+    assert.ok(await page.locator('#weather-chart .precipitation-value').count() >= 2, 'precipitation percentages appear above the curve');
+    assert.equal(await page.locator('#weather-saved').count(), 0, 'there is no saved forecast label');
+    assert.equal(await page.locator('#weather-chart .current-time').evaluate(el => getComputedStyle(el).stroke), 'rgb(214, 69, 69)', 'current time is red');
+    const annotations = await page.locator('#weather-chart .chart-annotation').evaluateAll(nodes => nodes.map(el => {
+      const b = el.getBoundingClientRect();
+      return { left: b.left, right: b.right, top: b.top, bottom: b.bottom };
+    }));
+    assert.ok(annotations.every((a, i) => annotations.slice(i + 1).every(b => a.right < b.left || a.left > b.right || a.bottom < b.top || a.top > b.bottom)), 'temperature and precipitation labels do not overlap');
+    assert.equal(await page.locator('#weather-chart').evaluate(chart => {
+      const boxes = [...chart.querySelectorAll('.chart-annotation')].map(el => el.getBBox());
+      return [...chart.querySelectorAll('.forecast-line')].every(path => {
+        for (let distance = 0; distance <= path.getTotalLength(); distance++) {
+          const p = path.getPointAtLength(distance);
+          if (boxes.some(b => p.x >= b.x - 1 && p.x <= b.x + b.width + 1 && p.y >= b.y - 1 && p.y <= b.y + b.height + 1)) return false;
+        }
+        return true;
+      });
+    }), true, 'numeric labels stay clear of both forecast curves');
     assert.ok(await page.locator('#weather-chart .day-boundary').count() >= 1, 'midnight is marked');
     assert.match(await page.locator('#weather-chart .day-label').first().textContent(), /Fri.*12AM/);
     assert.equal(await page.locator('.weather-now #weather-rain').count(), 1, 'precipitation is under current conditions');
@@ -172,7 +190,7 @@ async function run() {
     // daily cache separate so new tabs always return to the latest picture.
     await page.locator('#previous-day').click();
     await page.waitForFunction(() => document.getElementById('picture-title').textContent === 'Yesterday’s Test Galaxy');
-    assert.equal(await page.locator('#weather-saved').isVisible(), false, 'weather stays current on archive APODs');
+    assert.doesNotMatch(await page.locator('#weather-condition').getAttribute('title'), /Update unavailable/, 'weather stays current on archive APODs');
     assert.match(await page.locator('#sunrise-time').getAttribute('title'), /10\/7\/2026/);
     assert.equal(await page.locator('#picture-details').isVisible(), false, 'a newly selected picture starts with its details hidden');
     assert.equal(await page.locator('#picture-date').textContent(), 'October 7, 2026');
@@ -307,7 +325,7 @@ async function run() {
       await chrome.storage.local.set(saved);
     });
     await page.reload();
-    await page.waitForFunction(() => !document.getElementById('weather-saved').hidden);
+    await page.waitForFunction(() => document.getElementById('weather-condition').title.includes('Update unavailable'));
     assert.equal(await page.locator('#weather-temperature').textContent(), '20');
     await page.evaluate(async () => chrome.storage.local.set({ observerLocation: { latitude: 0, longitude: 0 } }));
     await page.waitForFunction(() => document.getElementById('weather-status').textContent.includes('Weather unavailable'));

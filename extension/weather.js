@@ -63,8 +63,45 @@ function renderChart(forecast) {
       const label = time.format(hour.time).replace(/\s/g, '');
       svg.append(svgNode('text', { x: x(i), y: 76, 'text-anchor': 'middle', class: boundary ? 'day-label' : 'time-label' }, boundary ? `${weekday.format(hour.time)} ${label}` : label));
     }
-    if (i % step === 0 && hour.temperature !== null) svg.append(svgNode('text', { x: x(i), y: yTemperature(hour.temperature) - 6, 'text-anchor': i === 0 ? 'start' : i === hours.length - 1 ? 'end' : 'middle', class: 'temperature-value' }, `${Math.round(hour.temperature)}°`));
   });
+
+  // Stagger precipitation between the temperature labels. Check every candidate
+  // against both curves and previously placed labels; omit one if space runs out.
+  const measure = document.createElement('canvas').getContext('2d');
+  measure.font = '9px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+  const occupied = [];
+  const lines = [['temperature', yTemperature], ['rain', yRain]];
+  function crossesCurve(box) {
+    return lines.some(([field, y]) => hours.some((hour, i) => {
+      if (!i || hour[field] === null || hours[i - 1][field] === null) return false;
+      const x1 = x(i - 1), x2 = x(i);
+      if (x2 < box.left || x1 > box.right) return false;
+      const y1 = y(hours[i - 1][field]), y2 = y(hour[field]);
+      const at = px => y1 + (px - x1) / (x2 - x1) * (y2 - y1);
+      const a = at(Math.max(x1, box.left)), b = at(Math.min(x2, box.right));
+      return Math.max(a, b) >= box.top - 2 && Math.min(a, b) <= box.bottom + 2;
+    }));
+  }
+  function annotate(index, field, y, suffix, className) {
+    const value = hours[index][field];
+    if (value === null) return;
+    const text = `${Math.round(value)}${suffix}`;
+    const half = measure.measureText(text).width / 2;
+    for (const rise of [6, 18, 30, 42]) {
+      const baseline = y(value) - rise;
+      if (baseline < 10) continue;
+      for (const shift of [0, 8, -8, 16, -16]) {
+        const cx = Math.max(left + half + 2, Math.min(right - half - 2, x(index) + shift));
+        const box = { left: cx - half - 2, right: cx + half + 2, top: baseline - 9, bottom: baseline + 2 };
+        if (occupied.some(other => box.left < other.right + 3 && box.right > other.left - 3 && box.top < other.bottom + 2 && box.bottom > other.top - 2) || crossesCurve(box)) continue;
+        occupied.push(box);
+        svg.append(svgNode('text', { x: cx, y: baseline, 'text-anchor': 'middle', class: `chart-annotation ${className}` }, text));
+        return;
+      }
+    }
+  }
+  for (let i = 0; i < hours.length; i += step) annotate(i, 'temperature', yTemperature, '°', 'temperature-value');
+  for (let i = Math.max(1, Math.floor(step / 2)); i < hours.length; i += step * 2) annotate(i, 'rain', yRain, '%', 'precipitation-value');
 
   svg.append(svgNode('rect', { x: 0, y: 0, width, height, fill: 'transparent', 'aria-hidden': 'true' }));
   const scrub = svgNode('g', { class: 'weather-scrub', visibility: 'hidden', 'aria-hidden': 'true', 'pointer-events': 'none' });
@@ -142,10 +179,7 @@ function render() {
   $('weather').setAttribute('aria-busy', 'false');
   $('weather-temperature').textContent = Math.round(temperatureIn(data.current.temperature, unit));
   $('weather-condition').textContent = weatherCondition(data.current.code, data.current.isDay);
-  const updated = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit', timeZone: data.timeZone }).format(data.current.time);
-  $('weather-saved').hidden = !stale;
-  $('weather-saved').title = `Update unavailable. Last conditions: ${updated}`;
-  $('weather-condition').title = `Conditions updated: ${new Date(data.current.time).toLocaleString(undefined, { timeZone: data.timeZone, timeZoneName: 'short' })}`;
+  $('weather-condition').title = `${stale ? 'Update unavailable. Conditions as of' : 'Conditions updated:'} ${new Date(data.current.time).toLocaleString(undefined, { timeZone: data.timeZone, timeZoneName: 'short' })}`;
   $('weather-rain').textContent = forecast.rain === null ? '—' : `${Math.round(forecast.rain)}%`;
   $('weather-rain').title = 'Precipitation chance in the next forecast hour (rain or snow).';
   $('weather-humidity').textContent = data.current.humidity === null ? '—' : `${Math.round(data.current.humidity)}%`;
