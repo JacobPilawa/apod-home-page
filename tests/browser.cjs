@@ -89,7 +89,17 @@ async function run() {
     assert.equal(await page.locator('#weather-rain').textContent(), '30%');
     assert.equal(await page.locator('#weather-chart .forecast-line').count(), 2, 'temperature and precipitation share one chart');
     assert.ok(await page.locator('#weather-chart .temperature-value').count() >= 5, 'temperatures are labeled at regular intervals');
-    assert.ok(await page.locator('#weather-chart .precipitation-value').count() >= 2, 'precipitation percentages appear above the curve');
+    assert.ok(await page.locator('#weather-chart .precipitation-value').count() >= 5, 'precipitation percentages align with the temperature intervals');
+    assert.equal(await page.locator('#weather-chart').evaluate(chart => {
+      const temperatures = [...chart.querySelectorAll('.temperature-value')];
+      const rain = [...chart.querySelectorAll('.precipitation-value')];
+      return new Set(temperatures.map(el => el.getAttribute('y'))).size === 1 &&
+        new Set(rain.map(el => el.getAttribute('y'))).size === 1 &&
+        temperatures.every(el => { const b = el.getBBox(); return b.y + b.height < 16; }) &&
+        rain.every(el => el.getBBox().y > 49) &&
+        getComputedStyle(temperatures[0]).fill === getComputedStyle(chart.querySelector('.temperature-line')).stroke &&
+        getComputedStyle(rain[0]).fill === getComputedStyle(chart.querySelector('.rain-line')).stroke;
+    }), true, 'value rows sit outside the plot and match their curve colors');
     assert.equal(await page.locator('#weather-saved').count(), 0, 'there is no saved forecast label');
     assert.equal(await page.locator('#weather-chart .current-time').evaluate(el => getComputedStyle(el).stroke), 'rgb(214, 69, 69)', 'current time is red');
     const annotations = await page.locator('#weather-chart .chart-annotation').evaluateAll(nodes => nodes.map(el => {

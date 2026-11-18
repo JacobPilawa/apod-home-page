@@ -21,7 +21,7 @@ function svgNode(tag, attributes = {}, text) {
 function renderChart(forecast) {
   const width = Math.max(100, $('weather-chart').clientWidth);
   const height = 78;
-  const left = 29, right = width - 38, top = 18, bottom = 59;
+  const left = 29, right = width - 38, top = 16, bottom = 49;
   const { hours, min, max } = forecast;
   const x = i => left + i / (hours.length - 1) * (right - left);
   const yTemperature = value => bottom - (value - min) / (max - min) * (bottom - top);
@@ -39,12 +39,12 @@ function renderChart(forecast) {
   for (const [value, y] of [[max, top], [min, bottom]]) svg.append(svgNode('text', { x: 0, y: y + 3, class: 'temperature-axis' }, `${value}°`));
   for (const [value, y] of [[100, top], [0, bottom]]) svg.append(svgNode('text', { x: width, y: y + 3, 'text-anchor': 'end', class: 'rain-axis' }, `${value}%`));
   for (const i of boundaries) {
-    svg.append(svgNode('line', { x1: x(i), x2: x(i), y1: 8, y2: bottom + 3, class: 'day-boundary' }));
+    svg.append(svgNode('line', { x1: x(i), x2: x(i), y1: top, y2: bottom + 3, class: 'day-boundary' }));
   }
   const now = Date.now();
   if (now >= hours[0].time && now <= hours.at(-1).time) {
     const currentX = left + (now - hours[0].time) / (hours.at(-1).time - hours[0].time) * (right - left);
-    svg.append(svgNode('line', { x1: currentX, x2: currentX, y1: 8, y2: bottom + 3, class: 'current-time', 'aria-label': 'Current time' }));
+    svg.append(svgNode('line', { x1: currentX, x2: currentX, y1: top, y2: bottom, class: 'current-time', 'aria-label': 'Current time' }));
   }
   // Missing observations break the line rather than silently becoming zero.
   for (const [field, y, className] of [['rain', yRain, 'rain-line'], ['temperature', yTemperature, 'temperature-line']]) {
@@ -65,47 +65,20 @@ function renderChart(forecast) {
     }
   });
 
-  // Stagger precipitation between the temperature labels. Check every candidate
-  // against both curves and previously placed labels; omit one if space runs out.
-  const measure = document.createElement('canvas').getContext('2d');
-  measure.font = '9px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-  const occupied = [];
-  const lines = [['temperature', yTemperature], ['rain', yRain]];
-  function crossesCurve(box) {
-    return lines.some(([field, y]) => hours.some((hour, i) => {
-      if (!i || hour[field] === null || hours[i - 1][field] === null) return false;
-      const x1 = x(i - 1), x2 = x(i);
-      if (x2 < box.left || x1 > box.right) return false;
-      const y1 = y(hours[i - 1][field]), y2 = y(hour[field]);
-      const at = px => y1 + (px - x1) / (x2 - x1) * (y2 - y1);
-      const a = at(Math.max(x1, box.left)), b = at(Math.min(x2, box.right));
-      return Math.max(a, b) >= box.top - 2 && Math.min(a, b) <= box.bottom + 2;
-    }));
-  }
-  function annotate(index, field, y, suffix, className) {
-    const value = hours[index][field];
-    if (value === null) return;
-    const text = `${Math.round(value)}${suffix}`;
-    const half = measure.measureText(text).width / 2;
-    for (const rise of [6, 18, 30, 42]) {
-      const baseline = y(value) - rise;
-      if (baseline < 10) continue;
-      for (const shift of [0, 8, -8, 16, -16]) {
-        const cx = Math.max(left + half + 2, Math.min(right - half - 2, x(index) + shift));
-        const box = { left: cx - half - 2, right: cx + half + 2, top: baseline - 9, bottom: baseline + 2 };
-        if (occupied.some(other => box.left < other.right + 3 && box.right > other.left - 3 && box.top < other.bottom + 2 && box.bottom > other.top - 2) || crossesCurve(box)) continue;
-        occupied.push(box);
-        svg.append(svgNode('text', { x: cx, y: baseline, 'text-anchor': 'middle', class: `chart-annotation ${className}` }, text));
-        return;
-      }
+  // Keep both value rows aligned with the same hourly positions.
+  for (let i = 0; i < hours.length; i += step) {
+    for (const [field, suffix, baseline, className] of [
+      ['temperature', '°', top - 5, 'temperature-value'],
+      ['rain', '%', bottom + 11, 'precipitation-value']
+    ]) {
+      if (hours[i][field] === null) continue;
+      svg.append(svgNode('text', { x: x(i), y: baseline, 'text-anchor': i === 0 ? 'start' : i === hours.length - 1 ? 'end' : 'middle', class: `chart-annotation ${className}` }, `${Math.round(hours[i][field])}${suffix}`));
     }
   }
-  for (let i = 0; i < hours.length; i += step) annotate(i, 'temperature', yTemperature, '°', 'temperature-value');
-  for (let i = Math.max(1, Math.floor(step / 2)); i < hours.length; i += step * 2) annotate(i, 'rain', yRain, '%', 'precipitation-value');
 
   svg.append(svgNode('rect', { x: 0, y: 0, width, height, fill: 'transparent', 'aria-hidden': 'true' }));
   const scrub = svgNode('g', { class: 'weather-scrub', visibility: 'hidden', 'aria-hidden': 'true', 'pointer-events': 'none' });
-  const guide = svgNode('line', { y1: 17, y2: bottom + 3 });
+  const guide = svgNode('line', { y1: top, y2: bottom + 3 });
   const temperatureDot = svgNode('circle', { r: 2.5, class: 'scrub-temperature' });
   const rainDot = svgNode('circle', { r: 2.5, class: 'scrub-rain' });
   scrub.append(guide, temperatureDot, rainDot);
