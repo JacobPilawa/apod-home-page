@@ -20,8 +20,8 @@ function svgNode(tag, attributes = {}, text) {
 
 function renderChart(forecast) {
   const width = Math.max(100, $('weather-chart').clientWidth);
-  const height = 64;
-  const left = 29, right = width - 38, top = 18, bottom = 45;
+  const height = 78;
+  const left = 29, right = width - 38, top = 18, bottom = 59;
   const { hours, min, max } = forecast;
   const x = i => left + i / (hours.length - 1) * (right - left);
   const yTemperature = value => bottom - (value - min) / (max - min) * (bottom - top);
@@ -33,16 +33,18 @@ function renderChart(forecast) {
   const boundaries = hours.flatMap((hour, i) => (i ? day.format(hour.time) !== day.format(hours[i - 1].time) : clock.format(hour.time) === '00:00') ? [i] : []);
   const fullTime = new Intl.DateTimeFormat(undefined, { weekday: 'short', hour: 'numeric', minute: '2-digit', timeZone: data.timeZone, timeZoneName: 'short' });
   const pointLabel = hour => `${fullTime.format(hour.time)}: ${hour.temperature === null ? 'temperature unavailable' : `${Math.round(hour.temperature)}°${unit}`}, ${hour.rain === null ? 'precipitation chance unavailable' : `${hour.rain}% precipitation chance`}`;
-  const svg = svgNode('svg', { viewBox: `0 0 ${width} ${height}`, role: 'img', 'aria-labelledby': 'weather-chart-title weather-chart-description' });
-  svg.append(svgNode('title', { id: 'weather-chart-title' }, `Next 24 hours: temperature (°${unit}, left axis) and precipitation chance (%, right axis)`),
-    svgNode('desc', { id: 'weather-chart-description' }, hours.map(pointLabel).join('; ')));
+  const svg = svgNode('svg', { viewBox: `0 0 ${width} ${height}`, role: 'img', tabindex: '0', 'aria-label': `Next 24 hours: temperature (°${unit}, left axis) and precipitation chance (%, right axis). Use arrow keys to explore.`, 'aria-describedby': 'weather-chart-description weather-readout' });
+  svg.append(svgNode('desc', { id: 'weather-chart-description' }, hours.map(pointLabel).join('; ')));
   for (const y of [top, bottom]) svg.append(svgNode('line', { x1: left, x2: right, y1: y, y2: y, class: 'chart-grid' }));
   for (const [value, y] of [[max, top], [min, bottom]]) svg.append(svgNode('text', { x: 0, y: y + 3, class: 'temperature-axis' }, `${value}°`));
   for (const [value, y] of [[100, top], [0, bottom]]) svg.append(svgNode('text', { x: width, y: y + 3, 'text-anchor': 'end', class: 'rain-axis' }, `${value}%`));
   for (const i of boundaries) {
-    const marker = svgNode('line', { x1: x(i), x2: x(i), y1: 8, y2: bottom + 3, class: 'day-boundary' });
-    marker.append(svgNode('title', {}, `${weekday.format(hours[i].time)} · Midnight`));
-    svg.append(marker);
+    svg.append(svgNode('line', { x1: x(i), x2: x(i), y1: 8, y2: bottom + 3, class: 'day-boundary' }));
+  }
+  const now = Date.now();
+  if (now >= hours[0].time && now <= hours.at(-1).time) {
+    const currentX = left + (now - hours[0].time) / (hours.at(-1).time - hours[0].time) * (right - left);
+    svg.append(svgNode('line', { x1: currentX, x2: currentX, y1: 8, y2: bottom + 3, class: 'current-time', 'aria-label': 'Current time' }));
   }
   // Missing observations break the line rather than silently becoming zero.
   for (const [field, y, className] of [['rain', yRain, 'rain-line'], ['temperature', yTemperature, 'temperature-line']]) {
@@ -59,14 +61,68 @@ function renderChart(forecast) {
     const boundary = boundaries.includes(i);
     if (boundary || (i % step === 0 && boundaries.every(b => Math.abs(x(i) - x(b)) > 46))) {
       const label = time.format(hour.time).replace(/\s/g, '');
-      svg.append(svgNode('text', { x: x(i), y: 62, 'text-anchor': 'middle', class: boundary ? 'day-label' : 'time-label' }, boundary ? `${weekday.format(hour.time)} ${label}` : label));
+      svg.append(svgNode('text', { x: x(i), y: 76, 'text-anchor': 'middle', class: boundary ? 'day-label' : 'time-label' }, boundary ? `${weekday.format(hour.time)} ${label}` : label));
     }
     if (i % step === 0 && hour.temperature !== null) svg.append(svgNode('text', { x: x(i), y: yTemperature(hour.temperature) - 6, 'text-anchor': i === 0 ? 'start' : i === hours.length - 1 ? 'end' : 'middle', class: 'temperature-value' }, `${Math.round(hour.temperature)}°`));
-    const hit = svgNode('rect', { x: x(i) - (right - left) / (hours.length - 1) / 2, y: 0, width: (right - left) / (hours.length - 1), height: 50, fill: 'transparent' });
-    hit.append(svgNode('title', {}, pointLabel(hour)));
-    svg.append(hit);
   });
-  $('weather-chart').replaceChildren(svg);
+
+  svg.append(svgNode('rect', { x: 0, y: 0, width, height, fill: 'transparent', 'aria-hidden': 'true' }));
+  const scrub = svgNode('g', { class: 'weather-scrub', visibility: 'hidden', 'aria-hidden': 'true', 'pointer-events': 'none' });
+  const guide = svgNode('line', { y1: 17, y2: bottom + 3 });
+  const temperatureDot = svgNode('circle', { r: 2.5, class: 'scrub-temperature' });
+  const rainDot = svgNode('circle', { r: 2.5, class: 'scrub-rain' });
+  scrub.append(guide, temperatureDot, rainDot);
+  svg.append(scrub);
+  const readout = document.createElement('div');
+  readout.id = 'weather-readout';
+  readout.className = 'weather-readout';
+  readout.setAttribute('role', 'tooltip');
+  readout.setAttribute('aria-live', 'polite');
+  readout.setAttribute('aria-atomic', 'true');
+  readout.hidden = true;
+  const hoverTime = new Intl.DateTimeFormat(undefined, { weekday: 'short', hour: 'numeric', minute: '2-digit', timeZone: data.timeZone });
+  let selected = -1;
+  function showHour(index) {
+    selected = Math.max(0, Math.min(hours.length - 1, index));
+    const hour = hours[selected];
+    const px = x(selected);
+    guide.setAttribute('x1', px);
+    guide.setAttribute('x2', px);
+    for (const [dot, value, y] of [[temperatureDot, hour.temperature, yTemperature], [rainDot, hour.rain, yRain]]) {
+      if (value === null) dot.setAttribute('display', 'none');
+      else dot.removeAttribute('display');
+      if (value !== null) { dot.setAttribute('cx', px); dot.setAttribute('cy', y(value)); }
+    }
+    scrub.setAttribute('visibility', 'visible');
+    readout.textContent = `${hoverTime.format(hour.time)} · ${hour.temperature === null ? '—' : `${Math.round(hour.temperature)}°${unit}`} · Precip ${hour.rain === null ? '—' : `${Math.round(hour.rain)}%`}`;
+    readout.hidden = false;
+    readout.style.left = `${Math.max(0, Math.min(width - readout.offsetWidth, px - readout.offsetWidth / 2))}px`;
+    $('weather-chart').setAttribute('data-scrubbing', '');
+  }
+  function clearScrub() {
+    selected = -1;
+    scrub.setAttribute('visibility', 'hidden');
+    readout.hidden = true;
+    $('weather-chart').removeAttribute('data-scrubbing');
+  }
+  svg.addEventListener('pointermove', event => {
+    const bounds = svg.getBoundingClientRect();
+    const px = (event.clientX - bounds.left) / bounds.width * width;
+    const index = Math.max(0, Math.min(hours.length - 1, Math.round((px - left) / (right - left) * (hours.length - 1))));
+    if (index !== selected) showHour(index);
+  });
+  svg.addEventListener('pointerleave', clearScrub);
+  svg.addEventListener('blur', clearScrub);
+  svg.addEventListener('keydown', event => {
+    const current = selected < 0 ? Math.round((now - hours[0].time) / 3600000) : selected;
+    if (event.key === 'Escape') { clearScrub(); return; }
+    const index = { ArrowLeft: current - 1, ArrowRight: current + 1, Home: 0, End: hours.length - 1 }[event.key];
+    if (index === undefined) return;
+    event.preventDefault();
+    showHour(index);
+  });
+  $('weather-chart').removeAttribute('data-scrubbing');
+  $('weather-chart').replaceChildren(svg, readout);
 }
 
 function showStatus(message) {

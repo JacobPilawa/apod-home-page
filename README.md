@@ -6,7 +6,7 @@ It shows the daily image above your shortcuts. Click the image title to show or 
 
 Sunrise, sunset, moonrise, moonset, and moon phase appear in a small row above the image. Location and time zone are detected automatically. You can override coordinates in **Customize**.
 
-A compact weather row shows current conditions, humidity, and the next 24 hours of temperature and precipitation chance together. Click **°F** or **°C** to switch units. Weather stays current when you browse older APODs. The image adjusts to leave room for your shortcuts.
+A compact weather row shows current conditions, humidity, and the next 24 hours of temperature and precipitation chance together. Hover over the chart for hourly values; midnight and the current time are marked. Click **°F** or **°C** to switch units. Weather stays current when you browse older APODs. The image adjusts to leave room for your shortcuts.
 
 ![APOD Home Page with local weather, sun and moon times, and site shortcuts](docs/example.png)
 
